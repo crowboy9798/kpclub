@@ -136,45 +136,6 @@ const Membership = () => {
           </div>
         </div>
 
-        {/* Membership Types */}
-        <div className="mb-16">
-          <h2 className="text-2xl font-semibold text-primary text-center mb-8">Membership Options</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {membershipTypes.map((membership, index) => (
-              <Card key={index} className={`card-elegant relative overflow-hidden ${membership.recommended ? 'ring-2 ring-secondary shadow-glow' : ''}`}>
-                {membership.recommended && (
-                  <div className="absolute top-0 right-0 bg-secondary text-secondary-foreground px-3 py-1 text-sm font-medium">
-                    Recommended
-                  </div>
-                )}
-                <CardHeader className="text-center pb-4">
-                  <CardTitle className="text-xl text-primary">{membership.title}</CardTitle>
-                  <div className="flex items-baseline justify-center gap-1">
-                    <span className="text-3xl font-bold text-primary">{membership.price}</span>
-                    <span className="text-muted-foreground">/{membership.period}</span>
-                  </div>
-                  <p className="text-muted-foreground text-sm">{membership.description}</p>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-3 mb-6">
-                    {membership.features.map((feature, featureIndex) => (
-                      <li key={featureIndex} className="flex items-start">
-                        <Check className="w-4 h-4 text-primary mt-0.5 mr-3 flex-shrink-0" />
-                        <span className="text-sm text-muted-foreground">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <Button 
-                    className="w-full" 
-                    variant={membership.recommended ? "default" : "outline"}
-                  >
-                    Choose This Plan
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
 
         {/* How to Join */}
         <div className="mb-16">
