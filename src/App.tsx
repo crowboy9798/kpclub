@@ -7,6 +7,7 @@ import Layout from "./components/Layout";
 import Home from "./pages/Home";
 import Events from "./pages/Events";
 import Membership from "./pages/Membership";
+import MembershipApplication from "./pages/MembershipApplication";
 import Contact from "./pages/Contact";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
@@ -24,6 +25,7 @@ const App = () => (
             <Route path="/" element={<Home />} />
             <Route path="/events" element={<Events />} />
             <Route path="/membership" element={<Membership />} />
+            <Route path="/membership-application" element={<MembershipApplication />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/admin" element={<Admin />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

@@ -185,9 +185,11 @@ const Membership = () => {
               <Mail className="w-4 h-4 mr-2" />
               Contact Us
             </Button>
-            <Button size="lg" variant="outline">
-              <FileText className="w-4 h-4 mr-2" />
-              Download Application
+            <Button size="lg" variant="outline" asChild>
+              <a href="/membership-application">
+                <FileText className="w-4 h-4 mr-2" />
+                Apply Online
+              </a>
             </Button>
           </div>
         </div>
