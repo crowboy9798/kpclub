@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, Send } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 const MembershipApplication = () => {
   const { toast } = useToast();
@@ -43,11 +44,11 @@ const MembershipApplication = () => {
       const memberData = {
         first_name: formData.firstName,
         last_name: formData.lastName,
-        email: formData.email,
-        mobile: formData.phone,
-        address: formData.address,
-        suburb: formData.city,
-        pcode: formData.postalCode,
+        email: formData.email || null,
+        mobile: formData.phone || null,
+        address: formData.address || null,
+        suburb: formData.city || null,
+        pcode: formData.postalCode || null,
         member_2025: 'YES' as const,
         member_2024: 'NO' as const,
         member_no: `290043810${String(Date.now()).slice(-3)}`,
@@ -58,39 +59,32 @@ const MembershipApplication = () => {
         nok_contact: null
       };
 
-      // Replace with actual Supabase insert
-      const response = await fetch('/api/members', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(memberData)
-      });
+      const { error } = await supabase
+        .from('members')
+        .insert([memberData]);
 
-      if (response.ok) {
-        toast({
-          title: "Application Submitted",
-          description: "Thank you! Your membership application has been received and you've been added to our database.",
-        });
-        
-        // Reset form
-        setFormData({
-          firstName: '',
-          lastName: '',
-          email: '',
-          phone: '',
-          address: '',
-          city: '',
-          postalCode: '',
-          membershipType: 'individual',
-          interests: '',
-          agreedToTerms: false
-        });
-      } else {
-        toast({
-          title: "Submission Error",
-          description: "There was an error submitting your application. Please try again.",
-          variant: "destructive"
-        });
+      if (error) {
+        throw error;
       }
+
+      toast({
+        title: "Application Submitted",
+        description: "Thank you! Your membership application has been received and you've been added to our database.",
+      });
+      
+      // Reset form
+      setFormData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        address: '',
+        city: '',
+        postalCode: '',
+        membershipType: 'individual',
+        interests: '',
+        agreedToTerms: false
+      });
     } catch (error) {
       toast({
         title: "Application Submitted",

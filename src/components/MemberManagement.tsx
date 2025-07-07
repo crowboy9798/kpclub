@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { Member, MemberFormData } from '@/types/member';
 import { Users, Plus, Upload, Download, Search, Edit, Trash2 } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 const MemberManagement = () => {
   const { toast } = useToast();
@@ -19,6 +20,7 @@ const MemberManagement = () => {
   const [filterYear, setFilterYear] = useState<'all' | '2024' | '2025'>('all');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<Member | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [formData, setFormData] = useState<MemberFormData>({
     first_name: '',
@@ -41,20 +43,23 @@ const MemberManagement = () => {
   const fetchMembers = async () => {
     try {
       setLoading(true);
-      // Replace with actual Supabase query
-      const response = await fetch('/api/members');
-      if (response.ok) {
-        const data = await response.json();
-        setMembers(data);
+      const { data, error } = await supabase
+        .from('members')
+        .select('*')
+        .order('last_name', { ascending: true });
+      
+      if (error) {
+        throw error;
       }
+      
+      setMembers(data || []);
     } catch (error) {
       console.error('Error fetching members:', error);
       toast({
         title: "Error",
-        description: "Failed to load members. Using demo data.",
+        description: "Failed to load members from database.",
         variant: "destructive"
       });
-      // Demo data for now
       setMembers([]);
     } finally {
       setLoading(false);
@@ -64,31 +69,41 @@ const MemberManagement = () => {
   const handleAddMember = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const newMember: Omit<Member, 'id'> = {
-        ...formData,
-        member_2025: 'YES',
-        member_2024: 'NO',
+      const newMember = {
+        first_name: formData.first_name,
+        last_name: formData.last_name,
+        email: formData.email || null,
+        mobile: formData.mobile || null,
+        address: formData.address || null,
+        suburb: formData.suburb || null,
+        pcode: formData.pcode || null,
+        dob: formData.dob || null,
+        nok: formData.nok || null,
+        nok_name: formData.nok_name || null,
+        nok_contact: formData.nok_contact || null,
+        member_2025: 'YES' as const,
+        member_2024: 'NO' as const,
         member_no: `290043810${String(Date.now()).slice(-3)}`,
         joined: new Date().toISOString().split('T')[0]
       };
 
-      // Replace with actual Supabase insert
-      const response = await fetch('/api/members', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newMember)
-      });
+      const { error } = await supabase
+        .from('members')
+        .insert([newMember]);
 
-      if (response.ok) {
-        toast({
-          title: "Member Added",
-          description: `${formData.first_name} ${formData.last_name} has been added successfully.`
-        });
-        setIsAddDialogOpen(false);
-        resetForm();
-        fetchMembers();
+      if (error) {
+        throw error;
       }
+
+      toast({
+        title: "Member Added",
+        description: `${formData.first_name} ${formData.last_name} has been added successfully.`
+      });
+      setIsAddDialogOpen(false);
+      resetForm();
+      fetchMembers();
     } catch (error) {
+      console.error('Error adding member:', error);
       toast({
         title: "Error",
         description: "Failed to add member. Please try again.",
@@ -102,25 +117,38 @@ const MemberManagement = () => {
     if (!editingMember) return;
 
     try {
-      const updatedMember = { ...editingMember, ...formData };
-      
-      // Replace with actual Supabase update
-      const response = await fetch(`/api/members/${editingMember.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedMember)
-      });
+      const updatedData = {
+        first_name: formData.first_name,
+        last_name: formData.last_name,
+        email: formData.email || null,
+        mobile: formData.mobile || null,
+        address: formData.address || null,
+        suburb: formData.suburb || null,
+        pcode: formData.pcode || null,
+        dob: formData.dob || null,
+        nok: formData.nok || null,
+        nok_name: formData.nok_name || null,
+        nok_contact: formData.nok_contact || null
+      };
 
-      if (response.ok) {
-        toast({
-          title: "Member Updated",
-          description: `${formData.first_name} ${formData.last_name} has been updated successfully.`
-        });
-        setEditingMember(null);
-        resetForm();
-        fetchMembers();
+      const { error } = await supabase
+        .from('members')
+        .update(updatedData)
+        .eq('id', editingMember.id);
+
+      if (error) {
+        throw error;
       }
+
+      toast({
+        title: "Member Updated",
+        description: `${formData.first_name} ${formData.last_name} has been updated successfully.`
+      });
+      setEditingMember(null);
+      resetForm();
+      fetchMembers();
     } catch (error) {
+      console.error('Error updating member:', error);
       toast({
         title: "Error",
         description: "Failed to update member. Please try again.",
@@ -135,19 +163,22 @@ const MemberManagement = () => {
     }
 
     try {
-      // Replace with actual Supabase delete
-      const response = await fetch(`/api/members/${member.id}`, {
-        method: 'DELETE'
-      });
+      const { error } = await supabase
+        .from('members')
+        .delete()
+        .eq('id', member.id);
 
-      if (response.ok) {
-        toast({
-          title: "Member Deleted",
-          description: `${member.first_name} ${member.last_name} has been deleted.`
-        });
-        fetchMembers();
+      if (error) {
+        throw error;
       }
+
+      toast({
+        title: "Member Deleted",
+        description: `${member.first_name} ${member.last_name} has been deleted.`
+      });
+      fetchMembers();
     } catch (error) {
+      console.error('Error deleting member:', error);
       toast({
         title: "Error",
         description: "Failed to delete member. Please try again.",
@@ -204,6 +235,110 @@ const MemberManagement = () => {
     return matchesSearch && matchesYear;
   });
 
+  const handleImportCSV = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const text = await file.text();
+      const lines = text.split('\n');
+      const headers = lines[0].split('\t');
+      
+      const members = lines.slice(1)
+        .filter(line => line.trim())
+        .map(line => {
+          const values = line.split('\t');
+          return {
+            first_name: values[1]?.trim() || '',
+            last_name: values[2]?.trim() || '',
+            member_2025: values[3]?.trim() || 'NO',
+            member_2024: values[4]?.trim() || 'NO',
+            member_no: values[5]?.trim() || '',
+            dob: values[6]?.trim() || null,
+            mobile: values[7]?.trim() || null,
+            joined: values[8]?.trim() || new Date().toISOString().split('T')[0],
+            email: values[9]?.trim() || null,
+            address: values[10]?.trim() || null,
+            suburb: values[11]?.trim() || null,
+            pcode: values[12]?.trim() || null,
+            nok: values[13]?.trim() || null,
+            nok_name: values[14]?.trim() || null,
+            nok_contact: values[15]?.trim() || null
+          };
+        })
+        .filter(member => member.first_name && member.last_name);
+
+      const { error } = await supabase
+        .from('members')
+        .upsert(members, { 
+          onConflict: 'member_no',
+          ignoreDuplicates: false 
+        });
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Import Successful",
+        description: `Successfully imported ${members.length} members.`
+      });
+      
+      fetchMembers();
+    } catch (error) {
+      console.error('Error importing CSV:', error);
+      toast({
+        title: "Import Error",
+        description: "Failed to import members. Please check the file format.",
+        variant: "destructive"
+      });
+    }
+    
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleExportCSV = () => {
+    const headers = ['ID', 'First Name', 'Last Name', '2025 Member', '2024 Member', 'Member No.', 'DOB', 'Mobile', 'Joined', 'Email', 'Address', 'Suburb', 'Pcode', 'NOK', 'NOK Name', 'NOK Contact'];
+    
+    const csvContent = [
+      headers.join('\t'),
+      ...members.map(member => [
+        member.id,
+        member.first_name,
+        member.last_name,
+        member.member_2025,
+        member.member_2024,
+        member.member_no,
+        member.dob || '',
+        member.mobile || '',
+        member.joined,
+        member.email || '',
+        member.address || '',
+        member.suburb || '',
+        member.pcode || '',
+        member.nok || '',
+        member.nok_name || '',
+        member.nok_contact || ''
+      ].join('\t'))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `members_export_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+    
+    toast({
+      title: "Export Successful",
+      description: `Exported ${members.length} members to CSV.`
+    });
+  };
+
   const getMembershipStatus = (member: Member) => {
     if (member.member_2025 === 'YES') return { text: '2025 Member', variant: 'default' as const };
     if (member.member_2025 === 'LTL') return { text: '2025 LTL', variant: 'secondary' as const };
@@ -233,14 +368,24 @@ const MemberManagement = () => {
             </DialogTrigger>
           </Dialog>
           
-          <Button variant="outline">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".csv,.tsv,.txt"
+            onChange={handleImportCSV}
+            style={{ display: 'none' }}
+          />
+          <Button 
+            variant="outline"
+            onClick={() => fileInputRef.current?.click()}
+          >
             <Upload className="w-4 h-4 mr-2" />
-            Import
+            Import CSV
           </Button>
           
-          <Button variant="outline">
+          <Button variant="outline" onClick={handleExportCSV}>
             <Download className="w-4 h-4 mr-2" />
-            Export
+            Export CSV
           </Button>
         </div>
       </div>
