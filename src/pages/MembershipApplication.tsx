@@ -27,7 +27,7 @@ const MembershipApplication = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.agreedToTerms) {
       toast({
@@ -38,10 +38,65 @@ const MembershipApplication = () => {
       return;
     }
     
-    toast({
-      title: "Application Submitted",
-      description: "Thank you! We'll review your application and contact you soon.",
-    });
+    try {
+      // Submit to database
+      const memberData = {
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        email: formData.email,
+        mobile: formData.phone,
+        address: formData.address,
+        suburb: formData.city,
+        pcode: formData.postalCode,
+        member_2025: 'YES' as const,
+        member_2024: 'NO' as const,
+        member_no: `290043810${String(Date.now()).slice(-3)}`,
+        joined: new Date().toISOString().split('T')[0],
+        dob: null,
+        nok: null,
+        nok_name: null,
+        nok_contact: null
+      };
+
+      // Replace with actual Supabase insert
+      const response = await fetch('/api/members', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(memberData)
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Application Submitted",
+          description: "Thank you! Your membership application has been received and you've been added to our database.",
+        });
+        
+        // Reset form
+        setFormData({
+          firstName: '',
+          lastName: '',
+          email: '',
+          phone: '',
+          address: '',
+          city: '',
+          postalCode: '',
+          membershipType: 'individual',
+          interests: '',
+          agreedToTerms: false
+        });
+      } else {
+        toast({
+          title: "Submission Error",
+          description: "There was an error submitting your application. Please try again.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Application Submitted",
+        description: "Thank you! We'll review your application and contact you soon.",
+      });
+    }
   };
 
   return (

@@ -2,10 +2,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Shield, Lock, Users, Calendar, Settings, Mail, Plus, Trash2 } from 'lucide-react';
+import { Shield, Lock, Users, Calendar, Settings, Mail } from 'lucide-react';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import MemberManagement from '@/components/MemberManagement';
 
 const Admin = () => {
   const { toast } = useToast();
@@ -14,9 +14,7 @@ const Admin = () => {
     username: '',
     password: ''
   });
-  const [memberGroups, setMemberGroups] = useState(['2024Members', '2025Members']);
-  const [selectedGroup, setSelectedGroup] = useState('');
-  const [newGroupName, setNewGroupName] = useState('');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'members'>('dashboard');
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,27 +42,6 @@ const Admin = () => {
     });
   };
 
-  const handleAddGroup = () => {
-    if (newGroupName.trim() && !memberGroups.includes(newGroupName.trim())) {
-      setMemberGroups([...memberGroups, newGroupName.trim()]);
-      setNewGroupName('');
-      toast({
-        title: "Group Added",
-        description: `${newGroupName.trim()} has been added to the member groups.`,
-      });
-    }
-  };
-
-  const handleRemoveGroup = (groupToRemove: string) => {
-    setMemberGroups(memberGroups.filter(group => group !== groupToRemove));
-    if (selectedGroup === groupToRemove) {
-      setSelectedGroup('');
-    }
-    toast({
-      title: "Group Removed",
-      description: `${groupToRemove} has been removed from the member groups.`,
-    });
-  };
 
   const adminFeatures = [
     {
@@ -174,164 +151,112 @@ const Admin = () => {
               Welcome back! Manage your club's information and activities.
             </p>
           </div>
-          <Button 
-            variant="outline" 
-            onClick={() => setIsLoggedIn(false)}
-          >
-            <Lock className="w-4 h-4 mr-2" />
-            Logout
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              variant={activeTab === 'dashboard' ? 'default' : 'outline'}
+              onClick={() => setActiveTab('dashboard')}
+            >
+              Dashboard
+            </Button>
+            <Button 
+              variant={activeTab === 'members' ? 'default' : 'outline'}
+              onClick={() => setActiveTab('members')}
+            >
+              <Users className="w-4 h-4 mr-2" />
+              Members
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsLoggedIn(false)}
+            >
+              <Lock className="w-4 h-4 mr-2" />
+              Logout
+            </Button>
+          </div>
         </div>
 
-        {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card className="card-elegant">
-            <CardContent className="p-6 text-center">
-              <Users className="w-8 h-8 text-primary mx-auto mb-2" />
-              <div className="text-2xl font-bold text-primary">127</div>
-              <div className="text-sm text-muted-foreground">Active Members</div>
-            </CardContent>
-          </Card>
-          
-          <Card className="card-elegant">
-            <CardContent className="p-6 text-center">
-              <Calendar className="w-8 h-8 text-secondary-foreground mx-auto mb-2" />
-              <div className="text-2xl font-bold text-primary">6</div>
-              <div className="text-sm text-muted-foreground">Upcoming Events</div>
-            </CardContent>
-          </Card>
-          
-          <Card className="card-elegant">
-            <CardContent className="p-6 text-center">
-              <Mail className="w-8 h-8 text-primary mx-auto mb-2" />
-              <div className="text-2xl font-bold text-primary">12</div>
-              <div className="text-sm text-muted-foreground">New Messages</div>
-            </CardContent>
-          </Card>
-          
-          <Card className="card-elegant">
-            <CardContent className="p-6 text-center">
-              <Settings className="w-8 h-8 text-secondary-foreground mx-auto mb-2" />
-              <div className="text-2xl font-bold text-primary">3</div>
-              <div className="text-sm text-muted-foreground">Pending Tasks</div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Admin Features */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {adminFeatures.map((feature, index) => {
-            const Icon = feature.icon;
-            
-            // Special handling for Member Management
-            if (feature.title === "Member Management") {
-              return (
-                <Card key={index} className="card-elegant">
-                  <CardHeader>
-                    <CardTitle className="flex items-center text-primary">
-                      <Icon className="w-6 h-6 mr-3" />
-                      {feature.title}
-                    </CardTitle>
-                    <p className="text-muted-foreground">{feature.description}</p>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {/* View Group List */}
-                      <div>
-                        <Label htmlFor="group-select" className="text-sm font-medium">
-                          View Group List
-                        </Label>
-                        <Select value={selectedGroup} onValueChange={setSelectedGroup}>
-                          <SelectTrigger className="w-full mt-1">
-                            <SelectValue placeholder="Select a member group" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {memberGroups.map((group) => (
-                              <SelectItem key={group} value={group}>
-                                {group}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      {/* Add New Group */}
-                      <div className="border-t pt-4">
-                        <Label htmlFor="new-group" className="text-sm font-medium">
-                          Add New Group
-                        </Label>
-                        <div className="flex gap-2 mt-1">
-                          <Input
-                            id="new-group"
-                            value={newGroupName}
-                            onChange={(e) => setNewGroupName(e.target.value)}
-                            placeholder="Enter group name"
-                            className="flex-1"
-                          />
-                          <Button onClick={handleAddGroup} size="sm">
-                            <Plus className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-
-                      {/* Manage Groups */}
-                      <div className="border-t pt-4">
-                        <Label className="text-sm font-medium mb-2 block">
-                          Manage Groups
-                        </Label>
-                        <div className="space-y-2">
-                          {memberGroups.map((group) => (
-                            <div key={group} className="flex items-center justify-between bg-accent/20 p-2 rounded">
-                              <span className="text-sm">{group}</span>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleRemoveGroup(group)}
-                                className="h-6 w-6 p-0 text-destructive hover:text-destructive"
-                              >
-                                <Trash2 className="w-3 h-3" />
-                              </Button>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            }
-            
-            // Default rendering for other features
-            return (
-              <Card key={index} className="card-elegant">
-                <CardHeader>
-                  <CardTitle className="flex items-center text-primary">
-                    <Icon className="w-6 h-6 mr-3" />
-                    {feature.title}
-                  </CardTitle>
-                  <p className="text-muted-foreground">{feature.description}</p>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    {feature.actions.map((action, actionIndex) => (
-                      <Button
-                        key={actionIndex}
-                        variant="ghost"
-                        className="w-full justify-start text-left"
-                        onClick={() => toast({
-                          title: "Feature Coming Soon",
-                          description: `${action} functionality will be available in the next update.`
-                        })}
-                      >
-                        {action}
-                      </Button>
-                    ))}
-                  </div>
+        {activeTab === 'dashboard' ? (
+          <>
+            {/* Quick Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+              <Card className="card-elegant">
+                <CardContent className="p-6 text-center">
+                  <Users className="w-8 h-8 text-primary mx-auto mb-2" />
+                  <div className="text-2xl font-bold text-primary">53</div>
+                  <div className="text-sm text-muted-foreground">Active Members</div>
                 </CardContent>
               </Card>
-            );
-          })}
-        </div>
+              
+              <Card className="card-elegant">
+                <CardContent className="p-6 text-center">
+                  <Calendar className="w-8 h-8 text-secondary-foreground mx-auto mb-2" />
+                  <div className="text-2xl font-bold text-primary">6</div>
+                  <div className="text-sm text-muted-foreground">Upcoming Events</div>
+                </CardContent>
+              </Card>
+              
+              <Card className="card-elegant">
+                <CardContent className="p-6 text-center">
+                  <Mail className="w-8 h-8 text-primary mx-auto mb-2" />
+                  <div className="text-2xl font-bold text-primary">12</div>
+                  <div className="text-sm text-muted-foreground">New Messages</div>
+                </CardContent>
+              </Card>
+              
+              <Card className="card-elegant">
+                <CardContent className="p-6 text-center">
+                  <Settings className="w-8 h-8 text-secondary-foreground mx-auto mb-2" />
+                  <div className="text-2xl font-bold text-primary">3</div>
+                  <div className="text-sm text-muted-foreground">Pending Tasks</div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Admin Features */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {adminFeatures.map((feature, index) => {
+                const Icon = feature.icon;
+                
+                return (
+                  <Card key={index} className="card-elegant">
+                    <CardHeader>
+                      <CardTitle className="flex items-center text-primary">
+                        <Icon className="w-6 h-6 mr-3" />
+                        {feature.title}
+                      </CardTitle>
+                      <p className="text-muted-foreground">{feature.description}</p>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2">
+                        {feature.actions.map((action, actionIndex) => (
+                          <Button
+                            key={actionIndex}
+                            variant="ghost"
+                            className="w-full justify-start text-left"
+                            onClick={() => {
+                              if (feature.title === "Member Management") {
+                                setActiveTab('members');
+                              } else {
+                                toast({
+                                  title: "Feature Coming Soon",
+                                  description: `${action} functionality will be available in the next update.`
+                                });
+                              }
+                            }}
+                          >
+                            {action}
+                          </Button>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          </>
+        ) : (
+          <MemberManagement />
+        )}
 
         {/* Recent Activity */}
         <div className="mt-8">
