@@ -90,25 +90,26 @@ const MemberManagement = () => {
     e.preventDefault();
     try {
       const newMember = {
-        first_name: formData.first_name,
-        last_name: formData.last_name,
-        email: formData.email || null,
-        mobile: formData.mobile || null,
-        address: formData.address || null,
-        suburb: formData.suburb || null,
-        pcode: formData.pcode || null,
-        dob: formData.dob || null,
-        nok: formData.nok || null,
-        nok_name: formData.nok_name || null,
-        nok_contact: formData.nok_contact || null,
-        member_2025: 'YES' as const,
-        member_2024: 'NO' as const,
-        member_no: `290043810${String(Date.now()).slice(-3)}`,
-        joined: new Date().toISOString().split('T')[0]
+        ID: `KPC-${Date.now()}`,
+        First_Name: formData.first_name,
+        Last_Name: formData.last_name,
+        Email: formData.email || null,
+        Mobile: formData.mobile || null,
+        Address: formData.address || null,
+        Suburb: formData.suburb || null,
+        Pcode: formData.pcode || null,
+        DOB: formData.dob || null,
+        NOK: formData.nok || null,
+        NOK_NAME: formData.nok_name || null,
+        NOK_Contact: formData.nok_contact || null,
+        Member_2025: 'YES' as const,
+        Member_2024: 'NO' as const,
+        Member_No: `290043810${String(Date.now()).slice(-3)}`,
+        Joined: new Date().toISOString().split('T')[0]
       };
 
       const { error } = await supabase
-        .from('members')
+        .from('KPC2')
         .insert([newMember]);
 
       if (error) {
@@ -138,23 +139,23 @@ const MemberManagement = () => {
 
     try {
       const updatedData = {
-        first_name: formData.first_name,
-        last_name: formData.last_name,
-        email: formData.email || null,
-        mobile: formData.mobile || null,
-        address: formData.address || null,
-        suburb: formData.suburb || null,
-        pcode: formData.pcode || null,
-        dob: formData.dob || null,
-        nok: formData.nok || null,
-        nok_name: formData.nok_name || null,
-        nok_contact: formData.nok_contact || null
+        First_Name: formData.first_name,
+        Last_Name: formData.last_name,
+        Email: formData.email || null,
+        Mobile: formData.mobile || null,
+        Address: formData.address || null,
+        Suburb: formData.suburb || null,
+        Pcode: formData.pcode || null,
+        DOB: formData.dob || null,
+        NOK: formData.nok || null,
+        NOK_NAME: formData.nok_name || null,
+        NOK_Contact: formData.nok_contact || null
       };
 
       const { error } = await supabase
-        .from('members')
+        .from('KPC2')
         .update(updatedData)
-        .eq('id', editingMember.id);
+        .eq('ID', editingMember.id);
 
       if (error) {
         throw error;
@@ -184,9 +185,9 @@ const MemberManagement = () => {
 
     try {
       const { error } = await supabase
-        .from('members')
+        .from('KPC2')
         .delete()
-        .eq('id', member.id);
+        .eq('ID', member.id);
 
       if (error) {
         throw error;
@@ -345,32 +346,33 @@ const MemberManagement = () => {
           const values = line.split(separator).map(v => v.trim());
           
           const member = {
-            first_name: columnMap.first_name >= 0 ? values[columnMap.first_name] || '' : '',
-            last_name: columnMap.last_name >= 0 ? values[columnMap.last_name] || '' : '',
-            member_2025: columnMap.member_2025 >= 0 ? values[columnMap.member_2025] || 'NO' : 'NO',
-            member_2024: columnMap.member_2024 >= 0 ? values[columnMap.member_2024] || 'NO' : 'NO',
-            member_no: columnMap.member_no >= 0 ? values[columnMap.member_no] || `AUTO-${Date.now()}-${index}` : `AUTO-${Date.now()}-${index}`,
-            dob: columnMap.dob >= 0 ? convertDate(values[columnMap.dob]) : null,
-            mobile: columnMap.mobile >= 0 ? cleanValue(values[columnMap.mobile]) : null,
-            joined: columnMap.joined >= 0 ? convertDate(values[columnMap.joined]) || new Date().toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-            email: columnMap.email >= 0 ? cleanValue(values[columnMap.email]) : null,
-            address: columnMap.address >= 0 ? cleanValue(values[columnMap.address]) : null,
-            suburb: columnMap.suburb >= 0 ? cleanValue(values[columnMap.suburb]) : null,
-            pcode: columnMap.pcode >= 0 ? cleanValue(values[columnMap.pcode]) : null,
-            nok: columnMap.nok >= 0 ? cleanValue(values[columnMap.nok]) : null,
-            nok_name: columnMap.nok_name >= 0 ? cleanValue(values[columnMap.nok_name]) : null,
-            nok_contact: columnMap.nok_contact >= 0 ? cleanValue(values[columnMap.nok_contact]) : null
+            ID: `KPC-IMPORT-${Date.now()}-${index}`,
+            First_Name: columnMap.first_name >= 0 ? values[columnMap.first_name] || '' : '',
+            Last_Name: columnMap.last_name >= 0 ? values[columnMap.last_name] || '' : '',
+            Member_2025: columnMap.member_2025 >= 0 ? values[columnMap.member_2025] || 'NO' : 'NO',
+            Member_2024: columnMap.member_2024 >= 0 ? values[columnMap.member_2024] || 'NO' : 'NO',
+            Member_No: columnMap.member_no >= 0 ? values[columnMap.member_no] || `AUTO-${Date.now()}-${index}` : `AUTO-${Date.now()}-${index}`,
+            DOB: columnMap.dob >= 0 ? convertDate(values[columnMap.dob]) : null,
+            Mobile: columnMap.mobile >= 0 ? cleanValue(values[columnMap.mobile]) : null,
+            Joined: columnMap.joined >= 0 ? convertDate(values[columnMap.joined]) || new Date().toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+            Email: columnMap.email >= 0 ? cleanValue(values[columnMap.email]) : null,
+            Address: columnMap.address >= 0 ? cleanValue(values[columnMap.address]) : null,
+            Suburb: columnMap.suburb >= 0 ? cleanValue(values[columnMap.suburb]) : null,
+            Pcode: columnMap.pcode >= 0 ? cleanValue(values[columnMap.pcode]) : null,
+            NOK: columnMap.nok >= 0 ? cleanValue(values[columnMap.nok]) : null,
+            NOK_NAME: columnMap.nok_name >= 0 ? cleanValue(values[columnMap.nok_name]) : null,
+            NOK_Contact: columnMap.nok_contact >= 0 ? cleanValue(values[columnMap.nok_contact]) : null
           };
 
           return member;
         })
-        .filter(member => member.first_name && member.last_name);
+        .filter(member => member.First_Name && member.Last_Name);
 
       console.log('Attempting to import', members.length, 'members');
       console.log('Sample member:', members[0]);
 
       const { data, error } = await supabase
-        .from('members')
+        .from('KPC2')
         .insert(members);
 
       if (error) {
