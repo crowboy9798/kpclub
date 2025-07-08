@@ -24,7 +24,7 @@ const Home = () => {
                 Join Our Club
               </Link>
             </Button>
-            <Button asChild size="lg" variant="outline" className="text-lg px-8 py-3 border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary">
+            <Button asChild size="lg" variant="outline" className="text-lg px-8 py-3 border-primary-foreground text-primary bg-primary-foreground hover:bg-primary hover:text-primary-foreground">
               <Link to="/events">
                 <Calendar className="w-5 h-5 mr-2" />
                 View Events
@@ -147,7 +147,7 @@ const Home = () => {
           </div>
           
           <div className="text-center">
-            <Button asChild variant="outline" size="lg">
+            <Button asChild variant="outline" size="lg" className="text-primary border-primary hover:bg-primary hover:text-primary-foreground">
               <Link to="/events">
                 View All Events
                 <ArrowRight className="w-4 h-4 ml-2" />
