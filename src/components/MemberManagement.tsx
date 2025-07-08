@@ -242,12 +242,17 @@ const MemberManagement = () => {
     try {
       const text = await file.text();
       const lines = text.split('\n');
-      const headers = lines[0].split('\t');
+      
+      // Detect separator (comma or tab)
+      const firstLine = lines[0] || '';
+      const separator = firstLine.includes('\t') ? '\t' : ',';
+      
+      const headers = firstLine.split(separator);
       
       const members = lines.slice(1)
         .filter(line => line.trim())
         .map(line => {
-          const values = line.split('\t');
+          const values = line.split(separator);
           return {
             first_name: values[1]?.trim() || '',
             last_name: values[2]?.trim() || '',
