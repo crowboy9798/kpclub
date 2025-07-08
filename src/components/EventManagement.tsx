@@ -140,6 +140,51 @@ const EventManagement = () => {
     }
   };
 
+  const handleImagePaste = async (e: React.ClipboardEvent) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item.type.indexOf('image') !== -1) {
+        const file = item.getAsFile();
+        if (!file) continue;
+
+        try {
+          const fileName = `pasted-${Date.now()}.png`;
+          const { data, error } = await supabase.storage
+            .from('event-images')
+            .upload(fileName, file);
+
+          if (error) throw error;
+
+          const { data: { publicUrl } } = supabase.storage
+            .from('event-images')
+            .getPublicUrl(fileName);
+
+          // Add image markdown to the detailed content
+          const imageMarkdown = `\n\n![Event Image](${publicUrl})\n\n`;
+          setFormData({ 
+            ...formData, 
+            detailed_content: (formData.detailed_content || '') + imageMarkdown 
+          });
+          
+          toast({
+            title: "Success",
+            description: "Image pasted successfully",
+          });
+        } catch (error) {
+          toast({
+            title: "Error",
+            description: "Failed to paste image",
+            variant: "destructive"
+          });
+        }
+        break;
+      }
+    }
+  };
+
   const openEditDialog = (event: Event) => {
     setEditingEvent(event);
     setFormData({
@@ -423,16 +468,20 @@ const EventManagement = () => {
 
                 {formData.featured && (
                   <>
-                    <div className="md:col-span-2">
-                      <Label htmlFor="detailed_content">Detailed Event Write-up</Label>
-                      <Textarea
-                        id="detailed_content"
-                        value={formData.detailed_content || ''}
-                        onChange={(e) => setFormData({ ...formData, detailed_content: e.target.value })}
-                        rows={6}
-                        placeholder="Add detailed information about this featured event..."
-                      />
-                    </div>
+                     <div className="md:col-span-2">
+                       <Label htmlFor="detailed_content">Detailed Event Write-up</Label>
+                       <p className="text-xs text-muted-foreground mb-2">
+                         💡 Tip: You can paste images directly (Ctrl+V) into this text area!
+                       </p>
+                       <Textarea
+                         id="detailed_content"
+                         value={formData.detailed_content || ''}
+                         onChange={(e) => setFormData({ ...formData, detailed_content: e.target.value })}
+                         onPaste={handleImagePaste}
+                         rows={6}
+                         placeholder="Add detailed information about this featured event... You can also paste images directly here!"
+                       />
+                     </div>
 
                     <div className="md:col-span-2">
                       <Label htmlFor="image_upload">Event Image (JPG, PNG, PDF)</Label>
