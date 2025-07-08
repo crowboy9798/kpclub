@@ -526,8 +526,8 @@ const MemberManagement = () => {
       {/* Filters */}
       <Card>
         <CardContent className="p-4">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex-1">
+          <div className="flex flex-col sm:flex-row gap-4 items-center">
+            <div className="w-full sm:w-80">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                 <Input
@@ -549,30 +549,32 @@ const MemberManagement = () => {
                 <SelectItem value="2024">2024 Members</SelectItem>
               </SelectContent>
             </Select>
+
+            {selectedMembers.size > 0 && (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground whitespace-nowrap">
+                  {selectedMembers.size} selected
+                </span>
+                <Select>
+                  <SelectTrigger className="w-48">
+                    <SelectValue placeholder="Add to group" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="new-group">: New Group :</SelectItem>
+                    <SelectItem value="committee">Committee</SelectItem>
+                    <SelectItem value="volunteers">Volunteers</SelectItem>
+                    <SelectItem value="sponsors">Sponsors</SelectItem>
+                    <SelectItem value="active-members">Active Members</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button variant="outline" size="sm" onClick={clearSelection}>
+                  Clear
+                </Button>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
-
-      {/* Selection Info */}
-      {selectedMembers.size > 0 && (
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">
-                {selectedMembers.size} member{selectedMembers.size !== 1 ? 's' : ''} selected
-              </span>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={clearSelection}>
-                  Clear Selection
-                </Button>
-                <Button size="sm">
-                  Add to Group
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Members Table */}
       <Card>
