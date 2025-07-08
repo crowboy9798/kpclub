@@ -256,11 +256,11 @@ const MemberManagement = () => {
       
       // Column mapping - flexible header names
       const columnMap = {
-        first_name: headers.findIndex(h => h.includes('first') || h.includes('firstname')),
-        last_name: headers.findIndex(h => h.includes('last') || h.includes('lastname') || h.includes('surname')),
-        member_2025: headers.findIndex(h => h.includes('2025')),
-        member_2024: headers.findIndex(h => h.includes('2024')),
-        member_no: headers.findIndex(h => h.includes('member') && h.includes('no')),
+        first_name: headers.findIndex(h => h.includes('first') || h === 'first name'),
+        last_name: headers.findIndex(h => h.includes('last') || h === 'last name'),
+        member_2025: headers.findIndex(h => h.includes('2025') || h === 'member 2025'),
+        member_2024: headers.findIndex(h => h.includes('2024') || h === 'member 2024'),
+        member_no: headers.findIndex(h => (h.includes('member') && h.includes('no')) || h === 'member no.'),
         dob: headers.findIndex(h => h.includes('dob') || h.includes('birth')),
         mobile: headers.findIndex(h => h.includes('mobile') || h.includes('phone')),
         joined: headers.findIndex(h => h.includes('joined') || h.includes('join')),
@@ -268,9 +268,20 @@ const MemberManagement = () => {
         address: headers.findIndex(h => h.includes('address')),
         suburb: headers.findIndex(h => h.includes('suburb') || h.includes('city')),
         pcode: headers.findIndex(h => h.includes('pcode') || h.includes('postal') || h.includes('zip')),
-        nok: headers.findIndex(h => h.includes('nok') && !h.includes('name') && !h.includes('contact')),
-        nok_name: headers.findIndex(h => h.includes('nok') && h.includes('name')),
-        nok_contact: headers.findIndex(h => h.includes('nok') && h.includes('contact'))
+        nok: headers.findIndex(h => h === 'nok' || (h.includes('nok') && !h.includes('name') && !h.includes('contact'))),
+        nok_name: headers.findIndex(h => h === 'nok name' || (h.includes('nok') && h.includes('name'))),
+        nok_contact: headers.findIndex(h => h === 'nok contact' || (h.includes('nok') && h.includes('contact')))
+      };
+
+      // Helper function to convert DD/MM/YYYY to YYYY-MM-DD
+      const convertDate = (dateStr: string) => {
+        if (!dateStr || dateStr.trim() === '') return null;
+        const parts = dateStr.split('/');
+        if (parts.length === 3) {
+          const [day, month, year] = parts;
+          return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+        }
+        return dateStr; // Return as-is if not in expected format
       };
 
       const members = lines.slice(1)
@@ -284,16 +295,16 @@ const MemberManagement = () => {
             member_2025: columnMap.member_2025 >= 0 ? values[columnMap.member_2025] || 'NO' : 'NO',
             member_2024: columnMap.member_2024 >= 0 ? values[columnMap.member_2024] || 'NO' : 'NO',
             member_no: columnMap.member_no >= 0 ? values[columnMap.member_no] || `AUTO-${Date.now()}-${index}` : `AUTO-${Date.now()}-${index}`,
-            dob: columnMap.dob >= 0 ? values[columnMap.dob] || null : null,
+            dob: columnMap.dob >= 0 ? convertDate(values[columnMap.dob]) : null,
             mobile: columnMap.mobile >= 0 ? values[columnMap.mobile] || null : null,
-            joined: columnMap.joined >= 0 ? values[columnMap.joined] || new Date().toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-            email: columnMap.email >= 0 ? values[columnMap.email] || null : null,
-            address: columnMap.address >= 0 ? values[columnMap.address] || null : null,
-            suburb: columnMap.suburb >= 0 ? values[columnMap.suburb] || null : null,
-            pcode: columnMap.pcode >= 0 ? values[columnMap.pcode] || null : null,
-            nok: columnMap.nok >= 0 ? values[columnMap.nok] || null : null,
-            nok_name: columnMap.nok_name >= 0 ? values[columnMap.nok_name] || null : null,
-            nok_contact: columnMap.nok_contact >= 0 ? values[columnMap.nok_contact] || null : null
+            joined: columnMap.joined >= 0 ? convertDate(values[columnMap.joined]) || new Date().toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+            email: columnMap.email >= 0 ? (values[columnMap.email] || null) : null,
+            address: columnMap.address >= 0 ? (values[columnMap.address] || null) : null,
+            suburb: columnMap.suburb >= 0 ? (values[columnMap.suburb] || null) : null,
+            pcode: columnMap.pcode >= 0 ? (values[columnMap.pcode] || null) : null,
+            nok: columnMap.nok >= 0 ? (values[columnMap.nok] || null) : null,
+            nok_name: columnMap.nok_name >= 0 ? (values[columnMap.nok_name] || null) : null,
+            nok_contact: columnMap.nok_contact >= 0 ? (values[columnMap.nok_contact] || null) : null
           };
 
           return member;
