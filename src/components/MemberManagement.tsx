@@ -273,14 +273,24 @@ const MemberManagement = () => {
         nok_contact: headers.findIndex(h => h === 'nok contact' || (h.includes('nok') && h.includes('contact')))
       };
 
-      // Helper function to convert DD/MM/YYYY or DD/MM/YY to YYYY-MM-DD
+      // Helper function to convert various date formats to YYYY-MM-DD
       const convertDate = (dateStr: string) => {
         if (!dateStr || dateStr.trim() === '' || dateStr.trim() === ' ') return null;
         
-        // Handle DD/MM/YYYY and DD/MM/YY formats
-        const parts = dateStr.trim().split('/');
+        const cleanDate = dateStr.trim();
+        const parts = cleanDate.split('/');
+        
         if (parts.length === 3) {
-          const [day, month, year] = parts;
+          let day, month, year;
+          
+          // Check if it's YYYY/MM/DD format (year is 4 digits and first)
+          if (parts[0].length === 4) {
+            [year, month, day] = parts;
+          } else {
+            // Assume DD/MM/YYYY or DD/MM/YY format
+            [day, month, year] = parts;
+          }
+          
           const dayNum = parseInt(day, 10);
           const monthNum = parseInt(month, 10);
           let yearNum = parseInt(year, 10);
