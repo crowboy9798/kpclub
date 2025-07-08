@@ -1,70 +1,48 @@
+import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Calendar, Clock, MapPin, Users, Star, ArrowRight } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
+import { format } from 'date-fns';
+
+interface Event {
+  id: string;
+  title: string;
+  description: string | null;
+  date_start: string;
+  date_end: string | null;
+  time_start: string | null;
+  time_end: string | null;
+  location: string | null;
+  category: string;
+  featured: boolean;
+  max_attendees: number | null;
+}
 
 const Events = () => {
-  const upcomingEvents = [
-    {
-      id: 1,
-      title: "Monthly Social Gathering",
-      date: "December 15, 2024",
-      time: "2:00 PM - 4:00 PM",
-      location: "Kensington Community Center - Main Hall",
-      description: "Join us for our monthly social meeting with coffee, light refreshments, and community updates. A perfect opportunity to catch up with fellow members and welcome newcomers.",
-      category: "Social",
-      featured: true
-    },
-    {
-      id: 2,
-      title: "Holiday Celebration",
-      date: "December 20, 2024",
-      time: "6:00 PM - 9:00 PM",
-      location: "Kensington Community Center - Main Hall",
-      description: "Celebrate the holiday season with festive activities, seasonal refreshments, live music, and good cheer. Bring your family and friends for an evening of joy and community spirit.",
-      category: "Special Event",
-      featured: true
-    },
-    {
-      id: 3,
-      title: "Guest Speaker Series: Local History",
-      date: "January 8, 2025",
-      time: "7:00 PM - 8:30 PM",
-      location: "Community Center - Conference Room",
-      description: "Join renowned historian Dr. Sarah Williams for a fascinating presentation on the rich heritage and history of our local area. Light refreshments will be served.",
-      category: "Educational",
-      featured: false
-    },
-    {
-      id: 4,
-      title: "Coffee Morning & Book Club",
-      date: "January 15, 2025",
-      time: "10:00 AM - 12:00 PM",
-      location: "Local Café - Main Street",
-      description: "Informal gathering for book lovers and coffee enthusiasts. This month we'll be discussing 'The Seven Husbands of Evelyn Hugo' by Taylor Jenkins Reid.",
-      category: "Social",
-      featured: false
-    },
-    {
-      id: 5,
-      title: "Community Service Day",
-      date: "January 22, 2025",
-      time: "9:00 AM - 1:00 PM",
-      location: "Kensington Park",
-      description: "Give back to our community by participating in park cleanup and beautification activities. Tools and refreshments provided. Suitable for all fitness levels.",
-      category: "Community Service",
-      featured: false
-    },
-    {
-      id: 6,
-      title: "Wine Tasting Evening",
-      date: "February 5, 2025",
-      time: "7:00 PM - 9:30 PM",
-      location: "The Vineyard Restaurant",
-      description: "Enjoy an elegant evening of wine tasting featuring local vineyards. Professional sommelier will guide us through wine selections paired with artisanal cheeses.",
-      category: "Social",
-      featured: false
+  const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchEvents();
+  }, []);
+
+  const fetchEvents = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('events')
+        .select('*')
+        .gte('date_start', new Date().toISOString().split('T')[0])
+        .order('date_start', { ascending: true });
+
+      if (error) throw error;
+      setUpcomingEvents(data || []);
+    } catch (error) {
+      console.error('Error fetching events:', error);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
   const getCategoryColor = (category: string) => {
     switch (category) {
@@ -116,12 +94,14 @@ const Events = () => {
                   <div className="space-y-2 mb-4">
                     <div className="flex items-center text-sm text-muted-foreground">
                       <Calendar className="w-4 h-4 mr-2 text-primary" />
-                      {event.date}
+                       {format(new Date(event.date_start), 'PPPP')}
                     </div>
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <Clock className="w-4 h-4 mr-2 text-primary" />
-                      {event.time}
-                    </div>
+                    {event.time_start && (
+                      <div className="flex items-center text-sm text-muted-foreground">
+                        <Clock className="w-4 h-4 mr-2 text-primary" />
+                        {event.time_start} {event.time_end && `- ${event.time_end}`}
+                      </div>
+                    )}
                     <div className="flex items-center text-sm text-muted-foreground">
                       <MapPin className="w-4 h-4 mr-2 text-primary" />
                       {event.location}
@@ -141,39 +121,45 @@ const Events = () => {
         {/* All Upcoming Events */}
         <div>
           <h2 className="text-2xl font-semibold text-primary mb-6">All Upcoming Events</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {upcomingEvents.map((event) => (
-              <Card key={event.id} className="card-elegant overflow-hidden hover:scale-105 transition-smooth">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${getCategoryColor(event.category)}`}>
-                      {event.category}
-                    </span>
-                    {event.featured && <Star className="w-4 h-4 text-secondary" />}
-                  </div>
-                  
-                  <h3 className="text-lg font-semibold text-primary mb-2">{event.title}</h3>
-                  <p className="text-muted-foreground text-sm mb-4 line-clamp-3">{event.description}</p>
-                  
-                  <div className="space-y-1 mb-4">
-                    <div className="flex items-center text-xs text-muted-foreground">
-                      <Calendar className="w-3 h-3 mr-2 text-primary" />
-                      {event.date}
+          {loading ? (
+            <div className="text-center py-8">Loading events...</div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {upcomingEvents.map((event) => (
+                <Card key={event.id} className="card-elegant overflow-hidden hover:scale-105 transition-smooth">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${getCategoryColor(event.category)}`}>
+                        {event.category}
+                      </span>
+                      {event.featured && <Star className="w-4 h-4 text-secondary" />}
                     </div>
-                    <div className="flex items-center text-xs text-muted-foreground">
-                      <Clock className="w-3 h-3 mr-2 text-primary" />
-                      {event.time}
+                    
+                    <h3 className="text-lg font-semibold text-primary mb-2">{event.title}</h3>
+                    <p className="text-muted-foreground text-sm mb-4 line-clamp-3">{event.description}</p>
+                    
+                    <div className="space-y-1 mb-4">
+                      <div className="flex items-center text-xs text-muted-foreground">
+                        <Calendar className="w-3 h-3 mr-2 text-primary" />
+                        {format(new Date(event.date_start), 'PPP')}
+                      </div>
+                      {event.time_start && (
+                        <div className="flex items-center text-xs text-muted-foreground">
+                          <Clock className="w-3 h-3 mr-2 text-primary" />
+                          {event.time_start} {event.time_end && `- ${event.time_end}`}
+                        </div>
+                      )}
                     </div>
-                  </div>
-                  
-                  <Button variant="ghost" size="sm" className="w-full text-primary hover:bg-primary/10">
-                    Learn More
-                    <ArrowRight className="w-3 h-3 ml-2" />
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                    
+                    <Button variant="ghost" size="sm" className="w-full text-primary hover:bg-primary/10">
+                      Learn More
+                      <ArrowRight className="w-3 h-3 ml-2" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Call to Action */}

@@ -6,6 +6,7 @@ import { Shield, Lock, Users, Calendar, Settings, Mail } from 'lucide-react';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import MemberManagement from '@/components/MemberManagement';
+import EventManagement from '@/components/EventManagement';
 
 const Admin = () => {
   const { toast } = useToast();
@@ -14,7 +15,7 @@ const Admin = () => {
     username: '',
     password: ''
   });
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'members'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'members' | 'events'>('dashboard');
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,7 +49,7 @@ const Admin = () => {
       icon: Calendar,
       title: "Event Management",
       description: "Add, edit, and delete club events",
-      actions: ["Add New Event", "Edit Existing Events", "View Event Analytics"]
+      actions: ["Add New Event", "Edit Existing Events"]
     },
     {
       icon: Users,
@@ -159,6 +160,13 @@ const Admin = () => {
               Members
             </Button>
             <Button 
+              variant={activeTab === 'events' ? 'default' : 'outline'}
+              onClick={() => setActiveTab('events')}
+            >
+              <Calendar className="w-4 h-4 mr-2" />
+              Events
+            </Button>
+            <Button 
               variant="outline" 
               onClick={() => setIsLoggedIn(false)}
             >
@@ -229,6 +237,8 @@ const Admin = () => {
                             onClick={() => {
                               if (feature.title === "Member Management") {
                                 setActiveTab('members');
+                              } else if (feature.title === "Event Management") {
+                                setActiveTab('events');
                               } else {
                                 toast({
                                   title: "Feature Coming Soon",
@@ -247,8 +257,10 @@ const Admin = () => {
               })}
             </div>
           </>
-        ) : (
+        ) : activeTab === 'members' ? (
           <MemberManagement />
+        ) : (
+          <EventManagement />
         )}
 
         {/* Recent Activity */}

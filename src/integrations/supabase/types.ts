@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      events: {
+        Row: {
+          category: string
+          created_at: string
+          date_end: string | null
+          date_start: string
+          description: string | null
+          featured: boolean
+          id: string
+          location: string | null
+          max_attendees: number | null
+          time_end: string | null
+          time_start: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          date_end?: string | null
+          date_start: string
+          description?: string | null
+          featured?: boolean
+          id?: string
+          location?: string | null
+          max_attendees?: number | null
+          time_end?: string | null
+          time_start?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          date_end?: string | null
+          date_start?: string
+          description?: string | null
+          featured?: boolean
+          id?: string
+          location?: string | null
+          max_attendees?: number | null
+          time_end?: string | null
+          time_start?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       KPC2: {
         Row: {
           Address: string | null
