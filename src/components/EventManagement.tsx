@@ -346,6 +346,7 @@ const EventManagement = () => {
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     rows={3}
+                    placeholder="Optional - Add event description"
                   />
                 </div>
 
