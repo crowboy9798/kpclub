@@ -552,18 +552,16 @@ const MemberManagement = () => {
 
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground whitespace-nowrap">
-                {selectedMembers.size > 0 ? `${selectedMembers.size} selected` : 'No selection'}
+                {selectedMembers.size > 0 ? `${selectedMembers.size} selected` : 'SELECT GROUP'}
               </span>
               <Select disabled={selectedMembers.size === 0}>
                 <SelectTrigger className="w-48">
                   <SelectValue placeholder="Add to group" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="new-group">: New Group :</SelectItem>
-                  <SelectItem value="committee">Committee</SelectItem>
-                  <SelectItem value="volunteers">Volunteers</SelectItem>
-                  <SelectItem value="sponsors">Sponsors</SelectItem>
-                  <SelectItem value="active-members">Active Members</SelectItem>
+                  <SelectItem value="member-2024">Member 2024</SelectItem>
+                  <SelectItem value="member-2025">Member 2025</SelectItem>
+                  <SelectItem value="new-group">NEW GROUP</SelectItem>
                 </SelectContent>
               </Select>
               <Button 
