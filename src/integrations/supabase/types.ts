@@ -22,11 +22,11 @@ export type Database = {
           email: string | null
           first_name: string
           id: number
-          joined: string
+          joined: string | null
           last_name: string
           member_2024: string | null
           member_2025: string | null
-          member_no: string
+          member_no: string | null
           mobile: string | null
           nok: string | null
           nok_contact: string | null
@@ -42,11 +42,11 @@ export type Database = {
           email?: string | null
           first_name: string
           id?: number
-          joined?: string
+          joined?: string | null
           last_name: string
           member_2024?: string | null
           member_2025?: string | null
-          member_no: string
+          member_no?: string | null
           mobile?: string | null
           nok?: string | null
           nok_contact?: string | null
@@ -62,11 +62,11 @@ export type Database = {
           email?: string | null
           first_name?: string
           id?: number
-          joined?: string
+          joined?: string | null
           last_name?: string
           member_2024?: string | null
           member_2025?: string | null
-          member_no?: string
+          member_no?: string | null
           mobile?: string | null
           nok?: string | null
           nok_contact?: string | null
@@ -74,21 +74,6 @@ export type Database = {
           pcode?: string | null
           suburb?: string | null
           updated_at?: string | null
-        }
-        Relationships: []
-      }
-      "new members table": {
-        Row: {
-          created_at: string
-          id: number
-        }
-        Insert: {
-          created_at?: string
-          id?: number
-        }
-        Update: {
-          created_at?: string
-          id?: number
         }
         Relationships: []
       }
