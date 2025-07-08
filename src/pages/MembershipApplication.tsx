@@ -29,15 +29,16 @@ const MembershipApplication = () => {
     emergencyContactRelationship: '',
     emergencyContactPhone: '',
     emergencyContactMobile: '',
-    agreedToConstitution: false,
-    agreedToInfoUse: false,
-    agreedToManagementRole: false,
-    agreedToDirectory: false,
-    agreedToDataAccess: false,
-    agreedToInfoProvision: false,
-    agreedToInsurance: false,
-    agreedToPublications: false,
-    agreedToDigitalPublications: false
+    agreement1: false,
+    agreement2: false,
+    agreement3: false,
+    agreement4: false,
+    agreement5: false,
+    agreement6: false,
+    agreement7: false,
+    agreement8: false,
+    agreement9: false,
+    agreement10: false
   });
 
   const handleInputChange = (field: string, value: string | boolean) => {
@@ -48,14 +49,15 @@ const MembershipApplication = () => {
     e.preventDefault();
     
     const requiredAgreements = [
-      formData.agreedToConstitution,
-      formData.agreedToInfoUse,
-      formData.agreedToManagementRole,
-      formData.agreedToDirectory,
-      formData.agreedToDataAccess,
-      formData.agreedToInfoProvision,
-      formData.agreedToInsurance,
-      formData.agreedToDigitalPublications
+      formData.agreement1,
+      formData.agreement2,
+      formData.agreement3,
+      formData.agreement4,
+      formData.agreement5,
+      formData.agreement6,
+      formData.agreement7,
+      formData.agreement8,
+      formData.agreement10
     ];
 
     if (!requiredAgreements.every(Boolean)) {
@@ -120,15 +122,16 @@ const MembershipApplication = () => {
         emergencyContactRelationship: '',
         emergencyContactPhone: '',
         emergencyContactMobile: '',
-        agreedToConstitution: false,
-        agreedToInfoUse: false,
-        agreedToManagementRole: false,
-        agreedToDirectory: false,
-        agreedToDataAccess: false,
-        agreedToInfoProvision: false,
-        agreedToInsurance: false,
-        agreedToPublications: false,
-        agreedToDigitalPublications: false
+        agreement1: false,
+        agreement2: false,
+        agreement3: false,
+        agreement4: false,
+        agreement5: false,
+        agreement6: false,
+        agreement7: false,
+        agreement8: false,
+        agreement9: false,
+        agreement10: false
       });
     } catch (error) {
       toast({
@@ -369,100 +372,115 @@ const MembershipApplication = () => {
                   <div className="space-y-4">
                     <div className="flex items-start space-x-2">
                       <Checkbox
-                        id="constitution"
-                        checked={formData.agreedToConstitution}
-                        onCheckedChange={(checked) => handleInputChange('agreedToConstitution', checked as boolean)}
+                        id="agreement1"
+                        checked={formData.agreement1}
+                        onCheckedChange={(checked) => handleInputChange('agreement1', checked as boolean)}
                       />
-                      <Label htmlFor="constitution" className="text-sm leading-relaxed">
-                        I agree to be bound by the provisions of the Club's constitution, by-laws and/or standing resolutions and agree to take an active role in the Club through my attendance and participation. *
+                      <Label htmlFor="agreement1" className="text-sm leading-relaxed">
+                        <span className="font-medium">1.</span> I agree to be bound by the provisions of the Club's constitution, by-laws and/or standing resolutions and agree to take an active role in the Club through my attendance and participation.
                       </Label>
                     </div>
 
                     <div className="flex items-start space-x-2">
                       <Checkbox
-                        id="infoUse"
-                        checked={formData.agreedToInfoUse}
-                        onCheckedChange={(checked) => handleInputChange('agreedToInfoUse', checked as boolean)}
+                        id="agreement2"
+                        checked={formData.agreement2}
+                        onCheckedChange={(checked) => handleInputChange('agreement2', checked as boolean)}
                       />
-                      <Label htmlFor="infoUse" className="text-sm leading-relaxed">
-                        I understand that the information provided in this application will be used to assess my application and maintain my membership. *
+                      <Label htmlFor="agreement2" className="text-sm leading-relaxed">
+                        <span className="font-medium">2.</span> I understand that the information provided in this application will be used to assess my application and maintain my membership. I understand that my application may not be processed if any of the above information is not provided.
                       </Label>
                     </div>
 
                     <div className="flex items-start space-x-2">
                       <Checkbox
-                        id="managementRole"
-                        checked={formData.agreedToManagementRole}
-                        onCheckedChange={(checked) => handleInputChange('agreedToManagementRole', checked as boolean)}
+                        id="agreement3"
+                        checked={formData.agreement3}
+                        onCheckedChange={(checked) => handleInputChange('agreement3', checked as boolean)}
                       />
-                      <Label htmlFor="managementRole" className="text-sm leading-relaxed">
-                        I acknowledge that at some time during my membership, I may be called upon to take an active role on the Management Committee. *
+                      <Label htmlFor="agreement3" className="text-sm leading-relaxed">
+                        <span className="font-medium">3.</span> I acknowledge that at some time during my membership, I may be called upon to take an active role on the Management Committee.
                       </Label>
                     </div>
 
                     <div className="flex items-start space-x-2">
                       <Checkbox
-                        id="directory"
-                        checked={formData.agreedToDirectory}
-                        onCheckedChange={(checked) => handleInputChange('agreedToDirectory', checked as boolean)}
+                        id="agreement4"
+                        checked={formData.agreement4}
+                        onCheckedChange={(checked) => handleInputChange('agreement4', checked as boolean)}
                       />
-                      <Label htmlFor="directory" className="text-sm leading-relaxed">
-                        I consent to my name, address, telephone number and email address being included in the 'Directory of Members' to be distributed only to members of the Club. *
+                      <Label htmlFor="agreement4" className="text-sm leading-relaxed">
+                        <span className="font-medium">4.</span> I consent to my name, address, telephone number and email address being included in the 'Directory of Members' to be distributed only to members of the Club.
                       </Label>
                     </div>
 
                     <div className="flex items-start space-x-2">
                       <Checkbox
-                        id="dataAccess"
-                        checked={formData.agreedToDataAccess}
-                        onCheckedChange={(checked) => handleInputChange('agreedToDataAccess', checked as boolean)}
+                        id="agreement5"
+                        checked={formData.agreement5}
+                        onCheckedChange={(checked) => handleInputChange('agreement5', checked as boolean)}
                       />
-                      <Label htmlFor="dataAccess" className="text-sm leading-relaxed">
-                        I understand that I may access any personal information the Club holds about me upon request. *
+                      <Label htmlFor="agreement5" className="text-sm leading-relaxed">
+                        <span className="font-medium">5.</span> I understand that I may access any personal information the Club holds about me upon request.
                       </Label>
                     </div>
 
                     <div className="flex items-start space-x-2">
                       <Checkbox
-                        id="infoProvision"
-                        checked={formData.agreedToInfoProvision}
-                        onCheckedChange={(checked) => handleInputChange('agreedToInfoProvision', checked as boolean)}
+                        id="agreement6"
+                        checked={formData.agreement6}
+                        onCheckedChange={(checked) => handleInputChange('agreement6', checked as boolean)}
                       />
-                      <Label htmlFor="infoProvision" className="text-sm leading-relaxed">
-                        Unless advised otherwise, I consent to the information provided in this application form being provided to Probus South Pacific Limited (PSPL). *
+                      <Label htmlFor="agreement6" className="text-sm leading-relaxed">
+                        <span className="font-medium">6.</span> Unless advised otherwise in accordance with point 7 below, I consent to the information provided in this application form being provided to Probus South Pacific Limited (PSPL). I understand that this information may be used, held and disclosed by PSPL in accordance with the PSPL Privacy Policy which can be viewed at{" "}
+                        <a href="https://www.probussouthpacific.org" target="_blank" rel="noopener noreferrer" className="text-primary underline">
+                          www.probussouthpacific.org
+                        </a>
+                        {" "}or by clicking here (online access only). By signing this form, I acknowledge that I have read and agree to the terms of the PSPL Privacy Policy.
                       </Label>
                     </div>
 
                     <div className="flex items-start space-x-2">
                       <Checkbox
-                        id="insurance"
-                        checked={formData.agreedToInsurance}
-                        onCheckedChange={(checked) => handleInputChange('agreedToInsurance', checked as boolean)}
+                        id="agreement7"
+                        checked={formData.agreement7}
+                        onCheckedChange={(checked) => handleInputChange('agreement7', checked as boolean)}
                       />
-                      <Label htmlFor="insurance" className="text-sm leading-relaxed">
-                        I understand that PSPL's National Insurance Program provides Public Liability Insurance of $20 million and that a summary of the coverage is available through the Club Secretary or the PSPL website. *
+                      <Label htmlFor="agreement7" className="text-sm leading-relaxed">
+                        <span className="font-medium">7.</span> I understand that the minimum information required by PSPL is my first name and last name and that it is my responsibility to advise the Club Secretary in writing if I do not want PSPL to hold any of the additional information in this application form or I do not wish to be contacted by PSPL.
                       </Label>
                     </div>
 
                     <div className="flex items-start space-x-2">
                       <Checkbox
-                        id="publications"
-                        checked={formData.agreedToPublications}
-                        onCheckedChange={(checked) => handleInputChange('agreedToPublications', checked as boolean)}
+                        id="agreement8"
+                        checked={formData.agreement8}
+                        onCheckedChange={(checked) => handleInputChange('agreement8', checked as boolean)}
                       />
-                      <Label htmlFor="publications" className="text-sm leading-relaxed">
-                        I understand that the Club and/or PSPL may publish photographs or videos of members on their websites, in newsletters and on social media to promote the Club and Probus generally.
+                      <Label htmlFor="agreement8" className="text-sm leading-relaxed">
+                        <span className="font-medium">8.</span> I understand that PSPL's National Insurance Program provides Public Liability Insurance of $20 million and that a summary of the coverage, which is subject to terms, conditions and limitations, is available through the Club Secretary or the PSPL website.
                       </Label>
                     </div>
 
                     <div className="flex items-start space-x-2">
                       <Checkbox
-                        id="digitalPublications"
-                        checked={formData.agreedToDigitalPublications}
-                        onCheckedChange={(checked) => handleInputChange('agreedToDigitalPublications', checked as boolean)}
+                        id="agreement9"
+                        checked={formData.agreement9}
+                        onCheckedChange={(checked) => handleInputChange('agreement9', checked as boolean)}
                       />
-                      <Label htmlFor="digitalPublications" className="text-sm leading-relaxed">
-                        I agree to receive digital Probus publications from PSPL, which I can unsubscribe from at any time. *
+                      <Label htmlFor="agreement9" className="text-sm leading-relaxed">
+                        <span className="font-medium">9.</span> I understand that the Club and/or PSPL may publish photographs or videos of members on their websites, in newsletters and on social media to promote the Club and Probus generally. By signing this application form, I consent to the publication of such photographs and videos unless I have advised the Club Secretary in writing that I do not consent to such publication.
+                      </Label>
+                    </div>
+
+                    <div className="flex items-start space-x-2">
+                      <Checkbox
+                        id="agreement10"
+                        checked={formData.agreement10}
+                        onCheckedChange={(checked) => handleInputChange('agreement10', checked as boolean)}
+                      />
+                      <Label htmlFor="agreement10" className="text-sm leading-relaxed">
+                        <span className="font-medium">10.</span> I agree to receive digital Probus publications from PSPL, which I can unsubscribe from at any time.
                       </Label>
                     </div>
                   </div>
