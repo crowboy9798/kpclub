@@ -38,7 +38,8 @@ const MembershipApplication = () => {
     agreement7: false,
     agreement8: false,
     agreement9: false,
-    agreement10: false
+    agreement10: false,
+    digitalSignatureName: ''
   });
 
   const handleInputChange = (field: string, value: string | boolean) => {
@@ -64,6 +65,15 @@ const MembershipApplication = () => {
       toast({
         title: "Terms Required",
         description: "Please agree to all the terms and conditions to continue.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!formData.digitalSignatureName.trim()) {
+      toast({
+        title: "Digital Signature Required",
+        description: "Please type your full name to digitally sign the application.",
         variant: "destructive"
       });
       return;
@@ -131,7 +141,8 @@ const MembershipApplication = () => {
         agreement7: false,
         agreement8: false,
         agreement9: false,
-        agreement10: false
+        agreement10: false,
+        digitalSignatureName: ''
       });
     } catch (error) {
       toast({
@@ -484,6 +495,32 @@ const MembershipApplication = () => {
                       </Label>
                     </div>
                   </div>
+                </CardContent>
+              </Card>
+
+              {/* Digital Signature */}
+              <Card className="bg-accent/10 border-accent">
+                <CardHeader>
+                  <CardTitle className="text-lg text-accent-foreground">Digital Acceptance</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    By typing your full name below, you acknowledge that you have read, understood, and agree to all the terms and conditions stated above.
+                  </p>
+                  <div>
+                    <Label htmlFor="digitalSignature">Type your full name to digitally sign this application *</Label>
+                    <Input
+                      id="digitalSignature"
+                      placeholder="Enter your full name"
+                      value={formData.digitalSignatureName}
+                      onChange={(e) => handleInputChange('digitalSignatureName', e.target.value)}
+                      required
+                      className="font-medium"
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    This constitutes your electronic signature and has the same legal effect as a handwritten signature.
+                  </p>
                 </CardContent>
               </Card>
 
