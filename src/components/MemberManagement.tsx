@@ -256,10 +256,10 @@ const MemberManagement = () => {
       
       // Column mapping - flexible header names
       const columnMap = {
-        first_name: headers.findIndex(h => h.includes('first') || h === 'first name'),
-        last_name: headers.findIndex(h => h.includes('last') || h === 'last name'),
-        member_2025: headers.findIndex(h => h.includes('2025') || h === 'member 2025'),
-        member_2024: headers.findIndex(h => h.includes('2024') || h === 'member 2024'),
+        first_name: headers.findIndex(h => h.includes('first') || h === 'first name' || h === 'firstname'),
+        last_name: headers.findIndex(h => h.includes('last') || h === 'last name' || h === 'lastname'),
+        member_2025: headers.findIndex(h => h.includes('2025') || h === 'member 2025' || h === 'member2025'),
+        member_2024: headers.findIndex(h => h.includes('2024') || h === 'member 2024' || h === 'member2024'),
         member_no: headers.findIndex(h => (h.includes('member') && h.includes('no')) || h === 'member no.'),
         dob: headers.findIndex(h => h.includes('dob') || h.includes('birth')),
         mobile: headers.findIndex(h => h.includes('mobile') || h.includes('phone')),
