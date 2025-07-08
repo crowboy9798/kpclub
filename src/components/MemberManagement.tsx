@@ -275,13 +275,25 @@ const MemberManagement = () => {
 
       // Helper function to convert DD/MM/YYYY to YYYY-MM-DD
       const convertDate = (dateStr: string) => {
-        if (!dateStr || dateStr.trim() === '') return null;
-        const parts = dateStr.split('/');
+        if (!dateStr || dateStr.trim() === '' || dateStr.trim() === ' ') return null;
+        
+        // Handle DD/MM/YYYY format specifically
+        const parts = dateStr.trim().split('/');
         if (parts.length === 3) {
           const [day, month, year] = parts;
-          return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+          // Validate day, month, year are numbers and in reasonable ranges
+          const dayNum = parseInt(day, 10);
+          const monthNum = parseInt(month, 10);
+          const yearNum = parseInt(year, 10);
+          
+          if (dayNum >= 1 && dayNum <= 31 && monthNum >= 1 && monthNum <= 12 && yearNum >= 1900 && yearNum <= 2100) {
+            return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+          }
         }
-        return dateStr; // Return as-is if not in expected format
+        
+        // If not in DD/MM/YYYY format, return null to avoid database errors
+        console.log('Invalid date format:', dateStr);
+        return null;
       };
 
       const members = lines.slice(1)
@@ -311,14 +323,15 @@ const MemberManagement = () => {
         })
         .filter(member => member.first_name && member.last_name);
 
-      const { error } = await supabase
+      console.log('Attempting to import', members.length, 'members');
+      console.log('Sample member:', members[0]);
+
+      const { data, error } = await supabase
         .from('members')
-        .upsert(members, { 
-          onConflict: 'member_no',
-          ignoreDuplicates: false 
-        });
+        .insert(members);
 
       if (error) {
+        console.error('Supabase error:', error);
         throw error;
       }
 
@@ -328,11 +341,19 @@ const MemberManagement = () => {
       });
       
       fetchMembers();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error importing CSV:', error);
+      
+      let errorMessage = "Failed to import members. Please check the file format.";
+      if (error?.message?.includes('Failed to fetch')) {
+        errorMessage = "Network connection error. Please check your internet connection and try again.";
+      } else if (error?.message?.includes('violates')) {
+        errorMessage = "Data validation error. Please check your CSV format and try again.";
+      }
+      
       toast({
         title: "Import Error",
-        description: "Failed to import members. Please check the file format.",
+        description: errorMessage,
         variant: "destructive"
       });
     }
