@@ -27,6 +27,8 @@ interface Event {
   category: string;
   featured: boolean;
   max_attendees: number | null;
+  pdf_url: string | null;
+  detailed_content: string | null;
 }
 
 interface EventFormData {
@@ -40,6 +42,8 @@ interface EventFormData {
   category: string;
   featured: boolean;
   max_attendees: string;
+  pdf_url?: string;
+  detailed_content?: string;
 }
 
 const EventManagement = () => {
@@ -58,7 +62,9 @@ const EventManagement = () => {
     location: '',
     category: 'Social',
     featured: false,
-    max_attendees: ''
+    max_attendees: '',
+    pdf_url: '',
+    detailed_content: ''
   });
 
   useEffect(() => {
@@ -96,9 +102,42 @@ const EventManagement = () => {
       location: '',
       category: 'Social',
       featured: false,
-      max_attendees: ''
+      max_attendees: '',
+      pdf_url: '',
+      detailed_content: ''
     });
     setEditingEvent(null);
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const fileName = `${Date.now()}-${file.name}`;
+      const { data, error } = await supabase.storage
+        .from('event-pdfs')
+        .upload(fileName, file);
+
+      if (error) throw error;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('event-pdfs')
+        .getPublicUrl(fileName);
+
+      setFormData({ ...formData, pdf_url: publicUrl });
+      
+      toast({
+        title: "Success",
+        description: "PDF uploaded successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to upload PDF",
+        variant: "destructive"
+      });
+    }
   };
 
   const openEditDialog = (event: Event) => {
@@ -113,7 +152,9 @@ const EventManagement = () => {
       location: event.location || '',
       category: event.category,
       featured: event.featured,
-      max_attendees: event.max_attendees?.toString() || ''
+      max_attendees: event.max_attendees?.toString() || '',
+      pdf_url: event.pdf_url || '',
+      detailed_content: event.detailed_content || ''
     });
     setIsDialogOpen(true);
   };
@@ -141,7 +182,9 @@ const EventManagement = () => {
         location: formData.location || null,
         category: formData.category,
         featured: formData.featured,
-        max_attendees: formData.max_attendees ? parseInt(formData.max_attendees) : null
+        max_attendees: formData.max_attendees ? parseInt(formData.max_attendees) : null,
+        pdf_url: formData.pdf_url || null,
+        detailed_content: formData.detailed_content || null
       };
 
       let error;
@@ -377,6 +420,37 @@ const EventManagement = () => {
                   />
                   <Label htmlFor="featured">Featured Event</Label>
                 </div>
+
+                {formData.featured && (
+                  <>
+                    <div className="md:col-span-2">
+                      <Label htmlFor="detailed_content">Detailed Event Write-up</Label>
+                      <Textarea
+                        id="detailed_content"
+                        value={formData.detailed_content || ''}
+                        onChange={(e) => setFormData({ ...formData, detailed_content: e.target.value })}
+                        rows={6}
+                        placeholder="Add detailed information about this featured event..."
+                      />
+                    </div>
+
+                    <div className="md:col-span-2">
+                      <Label htmlFor="pdf_upload">Event PDF Document</Label>
+                      <Input
+                        id="pdf_upload"
+                        type="file"
+                        accept=".pdf"
+                        onChange={handleFileUpload}
+                        className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/80"
+                      />
+                      {formData.pdf_url && (
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Current PDF: <a href={formData.pdf_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">View PDF</a>
+                        </p>
+                      )}
+                    </div>
+                  </>
+                )}
               </div>
 
               <div className="flex justify-end space-x-2">
