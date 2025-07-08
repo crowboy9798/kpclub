@@ -241,35 +241,62 @@ const MemberManagement = () => {
 
     try {
       const text = await file.text();
-      const lines = text.split('\n');
+      const lines = text.split('\n').filter(line => line.trim());
+      
+      if (lines.length < 2) {
+        throw new Error('CSV file must have headers and at least one data row');
+      }
       
       // Detect separator (comma or tab)
       const firstLine = lines[0] || '';
       const separator = firstLine.includes('\t') ? '\t' : ',';
       
-      const headers = firstLine.split(separator);
+      // Parse headers and create mapping
+      const headers = firstLine.split(separator).map(h => h.trim().toLowerCase());
       
+      // Column mapping - flexible header names
+      const columnMap = {
+        first_name: headers.findIndex(h => h.includes('first') || h.includes('firstname')),
+        last_name: headers.findIndex(h => h.includes('last') || h.includes('lastname') || h.includes('surname')),
+        member_2025: headers.findIndex(h => h.includes('2025')),
+        member_2024: headers.findIndex(h => h.includes('2024')),
+        member_no: headers.findIndex(h => h.includes('member') && h.includes('no')),
+        dob: headers.findIndex(h => h.includes('dob') || h.includes('birth')),
+        mobile: headers.findIndex(h => h.includes('mobile') || h.includes('phone')),
+        joined: headers.findIndex(h => h.includes('joined') || h.includes('join')),
+        email: headers.findIndex(h => h.includes('email')),
+        address: headers.findIndex(h => h.includes('address')),
+        suburb: headers.findIndex(h => h.includes('suburb') || h.includes('city')),
+        pcode: headers.findIndex(h => h.includes('pcode') || h.includes('postal') || h.includes('zip')),
+        nok: headers.findIndex(h => h.includes('nok') && !h.includes('name') && !h.includes('contact')),
+        nok_name: headers.findIndex(h => h.includes('nok') && h.includes('name')),
+        nok_contact: headers.findIndex(h => h.includes('nok') && h.includes('contact'))
+      };
+
       const members = lines.slice(1)
         .filter(line => line.trim())
-        .map(line => {
-          const values = line.split(separator);
-          return {
-            first_name: values[1]?.trim() || '',
-            last_name: values[2]?.trim() || '',
-            member_2025: values[3]?.trim() || 'NO',
-            member_2024: values[4]?.trim() || 'NO',
-            member_no: values[5]?.trim() || '',
-            dob: values[6]?.trim() || null,
-            mobile: values[7]?.trim() || null,
-            joined: values[8]?.trim() || new Date().toISOString().split('T')[0],
-            email: values[9]?.trim() || null,
-            address: values[10]?.trim() || null,
-            suburb: values[11]?.trim() || null,
-            pcode: values[12]?.trim() || null,
-            nok: values[13]?.trim() || null,
-            nok_name: values[14]?.trim() || null,
-            nok_contact: values[15]?.trim() || null
+        .map((line, index) => {
+          const values = line.split(separator).map(v => v.trim());
+          
+          const member = {
+            first_name: columnMap.first_name >= 0 ? values[columnMap.first_name] || '' : '',
+            last_name: columnMap.last_name >= 0 ? values[columnMap.last_name] || '' : '',
+            member_2025: columnMap.member_2025 >= 0 ? values[columnMap.member_2025] || 'NO' : 'NO',
+            member_2024: columnMap.member_2024 >= 0 ? values[columnMap.member_2024] || 'NO' : 'NO',
+            member_no: columnMap.member_no >= 0 ? values[columnMap.member_no] || `AUTO-${Date.now()}-${index}` : `AUTO-${Date.now()}-${index}`,
+            dob: columnMap.dob >= 0 ? values[columnMap.dob] || null : null,
+            mobile: columnMap.mobile >= 0 ? values[columnMap.mobile] || null : null,
+            joined: columnMap.joined >= 0 ? values[columnMap.joined] || new Date().toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+            email: columnMap.email >= 0 ? values[columnMap.email] || null : null,
+            address: columnMap.address >= 0 ? values[columnMap.address] || null : null,
+            suburb: columnMap.suburb >= 0 ? values[columnMap.suburb] || null : null,
+            pcode: columnMap.pcode >= 0 ? values[columnMap.pcode] || null : null,
+            nok: columnMap.nok >= 0 ? values[columnMap.nok] || null : null,
+            nok_name: columnMap.nok_name >= 0 ? values[columnMap.nok_name] || null : null,
+            nok_contact: columnMap.nok_contact >= 0 ? values[columnMap.nok_contact] || null : null
           };
+
+          return member;
         })
         .filter(member => member.first_name && member.last_name);
 
