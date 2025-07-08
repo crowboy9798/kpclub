@@ -21,8 +21,10 @@ export type Database = {
           date_end: string | null
           date_start: string
           description: string | null
+          detailed_content: string | null
           featured: boolean
           id: string
+          image_url: string | null
           location: string | null
           max_attendees: number | null
           time_end: string | null
@@ -36,8 +38,10 @@ export type Database = {
           date_end?: string | null
           date_start: string
           description?: string | null
+          detailed_content?: string | null
           featured?: boolean
           id?: string
+          image_url?: string | null
           location?: string | null
           max_attendees?: number | null
           time_end?: string | null
@@ -51,8 +55,10 @@ export type Database = {
           date_end?: string | null
           date_start?: string
           description?: string | null
+          detailed_content?: string | null
           featured?: boolean
           id?: string
+          image_url?: string | null
           location?: string | null
           max_attendees?: number | null
           time_end?: string | null
