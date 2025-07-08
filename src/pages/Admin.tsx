@@ -114,13 +114,6 @@ const Admin = () => {
                   />
                 </div>
 
-                <div className="bg-accent/30 p-3 rounded-lg">
-                  <p className="text-sm text-muted-foreground">
-                    <strong>Demo credentials:</strong><br />
-                    Username: admin<br />
-                    Password: password
-                  </p>
-                </div>
 
                 <Button type="submit" className="w-full" size="lg">
                   <Lock className="w-4 h-4 mr-2" />
