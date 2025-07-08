@@ -27,7 +27,7 @@ interface Event {
   category: string;
   featured: boolean;
   max_attendees: number | null;
-  pdf_url: string | null;
+  image_url: string | null;
   detailed_content: string | null;
 }
 
@@ -42,7 +42,7 @@ interface EventFormData {
   category: string;
   featured: boolean;
   max_attendees: string;
-  pdf_url?: string;
+  image_url?: string;
   detailed_content?: string;
 }
 
@@ -63,7 +63,7 @@ const EventManagement = () => {
     category: 'Social',
     featured: false,
     max_attendees: '',
-    pdf_url: '',
+    image_url: '',
     detailed_content: ''
   });
 
@@ -103,7 +103,7 @@ const EventManagement = () => {
       category: 'Social',
       featured: false,
       max_attendees: '',
-      pdf_url: '',
+      image_url: '',
       detailed_content: ''
     });
     setEditingEvent(null);
@@ -116,25 +116,25 @@ const EventManagement = () => {
     try {
       const fileName = `${Date.now()}-${file.name}`;
       const { data, error } = await supabase.storage
-        .from('event-pdfs')
+        .from('event-images')
         .upload(fileName, file);
 
       if (error) throw error;
 
       const { data: { publicUrl } } = supabase.storage
-        .from('event-pdfs')
+        .from('event-images')
         .getPublicUrl(fileName);
 
-      setFormData({ ...formData, pdf_url: publicUrl });
+      setFormData({ ...formData, image_url: publicUrl });
       
       toast({
         title: "Success",
-        description: "PDF uploaded successfully",
+        description: "Image uploaded successfully",
       });
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to upload PDF",
+        description: "Failed to upload image",
         variant: "destructive"
       });
     }
@@ -153,7 +153,7 @@ const EventManagement = () => {
       category: event.category,
       featured: event.featured,
       max_attendees: event.max_attendees?.toString() || '',
-      pdf_url: event.pdf_url || '',
+      image_url: event.image_url || '',
       detailed_content: event.detailed_content || ''
     });
     setIsDialogOpen(true);
@@ -183,7 +183,7 @@ const EventManagement = () => {
         category: formData.category,
         featured: formData.featured,
         max_attendees: formData.max_attendees ? parseInt(formData.max_attendees) : null,
-        pdf_url: formData.pdf_url || null,
+        image_url: formData.image_url || null,
         detailed_content: formData.detailed_content || null
       };
 
@@ -435,17 +435,17 @@ const EventManagement = () => {
                     </div>
 
                     <div className="md:col-span-2">
-                      <Label htmlFor="pdf_upload">Event PDF Document</Label>
+                      <Label htmlFor="image_upload">Event Image (JPG, PNG, PDF)</Label>
                       <Input
-                        id="pdf_upload"
+                        id="image_upload"
                         type="file"
-                        accept=".pdf"
+                        accept=".jpg,.jpeg,.png,.pdf"
                         onChange={handleFileUpload}
                         className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/80"
                       />
-                      {formData.pdf_url && (
+                      {formData.image_url && (
                         <p className="text-sm text-muted-foreground mt-1">
-                          Current PDF: <a href={formData.pdf_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">View PDF</a>
+                          Current file: <a href={formData.image_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">View file</a>
                         </p>
                       )}
                     </div>
