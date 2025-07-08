@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { Member, MemberFormData } from '@/types/member';
 import { Users, Plus, Upload, Download, Search, Edit, Trash2 } from 'lucide-react';
@@ -20,6 +21,7 @@ const MemberManagement = () => {
   const [filterYear, setFilterYear] = useState<'all' | '2024' | '2025'>('all');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<Member | null>(null);
+  const [selectedMembers, setSelectedMembers] = useState<Set<number>>(new Set());
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [formData, setFormData] = useState<MemberFormData>({
@@ -455,6 +457,28 @@ const MemberManagement = () => {
     return { text: 'Inactive', variant: 'destructive' as const };
   };
 
+  const handleSelectMember = (memberId: number) => {
+    const newSelected = new Set(selectedMembers);
+    if (newSelected.has(memberId)) {
+      newSelected.delete(memberId);
+    } else {
+      newSelected.add(memberId);
+    }
+    setSelectedMembers(newSelected);
+  };
+
+  const handleSelectAll = () => {
+    if (selectedMembers.size === filteredMembers.length) {
+      setSelectedMembers(new Set());
+    } else {
+      setSelectedMembers(new Set(filteredMembers.map(m => m.id)));
+    }
+  };
+
+  const clearSelection = () => {
+    setSelectedMembers(new Set());
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -529,6 +553,27 @@ const MemberManagement = () => {
         </CardContent>
       </Card>
 
+      {/* Selection Info */}
+      {selectedMembers.size > 0 && (
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-muted-foreground">
+                {selectedMembers.size} member{selectedMembers.size !== 1 ? 's' : ''} selected
+              </span>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={clearSelection}>
+                  Clear Selection
+                </Button>
+                <Button size="sm">
+                  Add to Group
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Members Table */}
       <Card>
         <CardHeader>
@@ -538,26 +583,40 @@ const MemberManagement = () => {
           {loading ? (
             <div className="text-center py-8">Loading members...</div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Member No.</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Mobile</TableHead>
-                  <TableHead>Suburb</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
+             <Table>
+               <TableHeader>
+                 <TableRow>
+                   <TableHead className="w-12">
+                     <Checkbox
+                       checked={selectedMembers.size === filteredMembers.length && filteredMembers.length > 0}
+                       onCheckedChange={handleSelectAll}
+                       aria-label="Select all members"
+                     />
+                   </TableHead>
+                   <TableHead>Name</TableHead>
+                   <TableHead>Member No.</TableHead>
+                   <TableHead>Status</TableHead>
+                   <TableHead>Email</TableHead>
+                   <TableHead>Mobile</TableHead>
+                   <TableHead>Suburb</TableHead>
+                   <TableHead>Actions</TableHead>
+                 </TableRow>
+               </TableHeader>
               <TableBody>
-                {filteredMembers.map((member) => {
-                  const status = getMembershipStatus(member);
-                  return (
-                    <TableRow key={member.id}>
-                      <TableCell className="font-medium">
-                        {member.first_name} {member.last_name}
-                      </TableCell>
+                 {filteredMembers.map((member) => {
+                   const status = getMembershipStatus(member);
+                   return (
+                     <TableRow key={member.id}>
+                       <TableCell>
+                         <Checkbox
+                           checked={selectedMembers.has(member.id)}
+                           onCheckedChange={() => handleSelectMember(member.id)}
+                           aria-label={`Select ${member.first_name} ${member.last_name}`}
+                         />
+                       </TableCell>
+                       <TableCell className="font-medium">
+                         {member.first_name} {member.last_name}
+                       </TableCell>
                       <TableCell>{member.member_no}</TableCell>
                       <TableCell>
                         <Badge variant={status.variant}>{status.text}</Badge>
