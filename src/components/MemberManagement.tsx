@@ -44,15 +44,35 @@ const MemberManagement = () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
-        .from('members')
+        .from('KPC2')
         .select('*')
-        .order('last_name', { ascending: true });
+        .order('Last_Name', { ascending: true });
       
       if (error) {
         throw error;
       }
       
-      setMembers(data || []);
+      // Map the database columns to our interface
+      const mappedData = data?.map((item: any) => ({
+        id: item.ID,
+        first_name: item.First_Name || '',
+        last_name: item.Last_Name || '',
+        member_2025: item.Member_2025 || 'NO',
+        member_2024: item.Member_2024 || 'NO',
+        member_no: item.Member_No || '',
+        dob: item.DOB,
+        mobile: item.Mobile,
+        joined: item.Joined || '',
+        email: item.Email,
+        address: item.Address,
+        suburb: item.Suburb,
+        pcode: item.Pcode,
+        nok: item.NOK,
+        nok_name: item.NOK_NAME,
+        nok_contact: item.NOK_Contact
+      })) || [];
+      
+      setMembers(mappedData);
     } catch (error) {
       console.error('Error fetching members:', error);
       toast({
