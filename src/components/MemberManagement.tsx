@@ -550,28 +550,31 @@ const MemberManagement = () => {
               </SelectContent>
             </Select>
 
-            {selectedMembers.size > 0 && (
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground whitespace-nowrap">
-                  {selectedMembers.size} selected
-                </span>
-                <Select>
-                  <SelectTrigger className="w-48">
-                    <SelectValue placeholder="Add to group" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="new-group">: New Group :</SelectItem>
-                    <SelectItem value="committee">Committee</SelectItem>
-                    <SelectItem value="volunteers">Volunteers</SelectItem>
-                    <SelectItem value="sponsors">Sponsors</SelectItem>
-                    <SelectItem value="active-members">Active Members</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Button variant="outline" size="sm" onClick={clearSelection}>
-                  Clear
-                </Button>
-              </div>
-            )}
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground whitespace-nowrap">
+                {selectedMembers.size > 0 ? `${selectedMembers.size} selected` : 'No selection'}
+              </span>
+              <Select disabled={selectedMembers.size === 0}>
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder="Add to group" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="new-group">: New Group :</SelectItem>
+                  <SelectItem value="committee">Committee</SelectItem>
+                  <SelectItem value="volunteers">Volunteers</SelectItem>
+                  <SelectItem value="sponsors">Sponsors</SelectItem>
+                  <SelectItem value="active-members">Active Members</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={clearSelection}
+                disabled={selectedMembers.size === 0}
+              >
+                Clear
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
