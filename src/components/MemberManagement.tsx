@@ -539,16 +539,9 @@ const MemberManagement = () => {
               </div>
             </div>
             
-            <Select value={filterYear} onValueChange={(value: 'all' | '2024' | '2025') => setFilterYear(value)}>
-              <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder="Filter by year" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Members</SelectItem>
-                <SelectItem value="2025">2025 Members</SelectItem>
-                <SelectItem value="2024">2024 Members</SelectItem>
-              </SelectContent>
-            </Select>
+            <Button variant="outline" className="whitespace-nowrap">
+              Go
+            </Button>
 
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground whitespace-nowrap">
