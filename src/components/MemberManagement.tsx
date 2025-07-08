@@ -273,27 +273,40 @@ const MemberManagement = () => {
         nok_contact: headers.findIndex(h => h === 'nok contact' || (h.includes('nok') && h.includes('contact')))
       };
 
-      // Helper function to convert DD/MM/YYYY to YYYY-MM-DD
+      // Helper function to convert DD/MM/YYYY or DD/MM/YY to YYYY-MM-DD
       const convertDate = (dateStr: string) => {
         if (!dateStr || dateStr.trim() === '' || dateStr.trim() === ' ') return null;
         
-        // Handle DD/MM/YYYY format specifically
+        // Handle DD/MM/YYYY and DD/MM/YY formats
         const parts = dateStr.trim().split('/');
         if (parts.length === 3) {
           const [day, month, year] = parts;
-          // Validate day, month, year are numbers and in reasonable ranges
           const dayNum = parseInt(day, 10);
           const monthNum = parseInt(month, 10);
-          const yearNum = parseInt(year, 10);
+          let yearNum = parseInt(year, 10);
+          
+          // Handle 2-digit years (YY format) - assume 20XX for years 00-30, 19XX for 31-99
+          if (yearNum >= 0 && yearNum <= 99) {
+            if (yearNum <= 30) {
+              yearNum += 2000;
+            } else {
+              yearNum += 1900;
+            }
+          }
           
           if (dayNum >= 1 && dayNum <= 31 && monthNum >= 1 && monthNum <= 12 && yearNum >= 1900 && yearNum <= 2100) {
-            return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+            return `${yearNum}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
           }
         }
         
-        // If not in DD/MM/YYYY format, return null to avoid database errors
         console.log('Invalid date format:', dateStr);
         return null;
+      };
+
+      // Helper function to clean values (convert "0" to null)
+      const cleanValue = (value: string) => {
+        if (!value || value.trim() === '' || value.trim() === '0') return null;
+        return value.trim();
       };
 
       const members = lines.slice(1)
@@ -308,15 +321,15 @@ const MemberManagement = () => {
             member_2024: columnMap.member_2024 >= 0 ? values[columnMap.member_2024] || 'NO' : 'NO',
             member_no: columnMap.member_no >= 0 ? values[columnMap.member_no] || `AUTO-${Date.now()}-${index}` : `AUTO-${Date.now()}-${index}`,
             dob: columnMap.dob >= 0 ? convertDate(values[columnMap.dob]) : null,
-            mobile: columnMap.mobile >= 0 ? values[columnMap.mobile] || null : null,
+            mobile: columnMap.mobile >= 0 ? cleanValue(values[columnMap.mobile]) : null,
             joined: columnMap.joined >= 0 ? convertDate(values[columnMap.joined]) || new Date().toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-            email: columnMap.email >= 0 ? (values[columnMap.email] || null) : null,
-            address: columnMap.address >= 0 ? (values[columnMap.address] || null) : null,
-            suburb: columnMap.suburb >= 0 ? (values[columnMap.suburb] || null) : null,
-            pcode: columnMap.pcode >= 0 ? (values[columnMap.pcode] || null) : null,
-            nok: columnMap.nok >= 0 ? (values[columnMap.nok] || null) : null,
-            nok_name: columnMap.nok_name >= 0 ? (values[columnMap.nok_name] || null) : null,
-            nok_contact: columnMap.nok_contact >= 0 ? (values[columnMap.nok_contact] || null) : null
+            email: columnMap.email >= 0 ? cleanValue(values[columnMap.email]) : null,
+            address: columnMap.address >= 0 ? cleanValue(values[columnMap.address]) : null,
+            suburb: columnMap.suburb >= 0 ? cleanValue(values[columnMap.suburb]) : null,
+            pcode: columnMap.pcode >= 0 ? cleanValue(values[columnMap.pcode]) : null,
+            nok: columnMap.nok >= 0 ? cleanValue(values[columnMap.nok]) : null,
+            nok_name: columnMap.nok_name >= 0 ? cleanValue(values[columnMap.nok_name]) : null,
+            nok_contact: columnMap.nok_contact >= 0 ? cleanValue(values[columnMap.nok_contact]) : null
           };
 
           return member;
