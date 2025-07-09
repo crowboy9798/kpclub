@@ -20,15 +20,14 @@ const MembershipApplication = () => {
     dateOfBirth: '',
     email: '',
     address: '',
+    suburb: '',
     postcode: '',
-    landline: '',
     mobile: '',
     formerVocation: '',
     hobbies: '',
     emergencyContactName: '',
     emergencyContactRelationship: '',
     emergencyContactPhone: '',
-    emergencyContactMobile: '',
     agreement1: false,
     agreement2: false,
     agreement3: false,
@@ -88,7 +87,7 @@ const MembershipApplication = () => {
         Email: formData.email || null,
         Mobile: formData.mobile || null,
         Address: formData.address || null,
-        Suburb: null,
+        Suburb: formData.suburb || null,
         Pcode: formData.postcode || null,
         Member_2025: 'YES',
         Member_2024: 'NO',
@@ -123,15 +122,14 @@ const MembershipApplication = () => {
         dateOfBirth: '',
         email: '',
         address: '',
+        suburb: '',
         postcode: '',
-        landline: '',
         mobile: '',
         formerVocation: '',
         hobbies: '',
         emergencyContactName: '',
         emergencyContactRelationship: '',
         emergencyContactPhone: '',
-        emergencyContactMobile: '',
         agreement1: false,
         agreement2: false,
         agreement3: false,
@@ -257,7 +255,7 @@ const MembershipApplication = () => {
               <div className="space-y-6">
                 <h2 className="text-xl font-semibold text-primary">Contact Information</h2>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <Label htmlFor="address">Address *</Label>
                     <Input
@@ -265,6 +263,14 @@ const MembershipApplication = () => {
                       value={formData.address}
                       onChange={(e) => handleInputChange('address', e.target.value)}
                       required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="suburb">Suburb</Label>
+                    <Input
+                      id="suburb"
+                      value={formData.suburb}
+                      onChange={(e) => handleInputChange('suburb', e.target.value)}
                     />
                   </div>
                   <div>
@@ -278,18 +284,9 @@ const MembershipApplication = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="landline">Landline</Label>
-                    <Input
-                      id="landline"
-                      type="tel"
-                      value={formData.landline}
-                      onChange={(e) => handleInputChange('landline', e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="mobile">Mobile *</Label>
+                    <Label htmlFor="mobile">Mobile/Landline *</Label>
                     <Input
                       id="mobile"
                       type="tel"
@@ -352,7 +349,7 @@ const MembershipApplication = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4">
                   <div>
                     <Label htmlFor="emergencyContactPhone">Emergency Contact Telephone</Label>
                     <Input
@@ -360,15 +357,6 @@ const MembershipApplication = () => {
                       type="tel"
                       value={formData.emergencyContactPhone}
                       onChange={(e) => handleInputChange('emergencyContactPhone', e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="emergencyContactMobile">Mobile</Label>
-                    <Input
-                      id="emergencyContactMobile"
-                      type="tel"
-                      value={formData.emergencyContactMobile}
-                      onChange={(e) => handleInputChange('emergencyContactMobile', e.target.value)}
                     />
                   </div>
                 </div>

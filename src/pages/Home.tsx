@@ -1,9 +1,66 @@
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
-import { Calendar, Users, Coffee, Heart, ArrowRight, Star } from 'lucide-react';
+import { Calendar, Users, Coffee, Heart, ArrowRight, Star, Clock, MapPin } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
+import { format } from 'date-fns';
+
+interface Event {
+  id: string;
+  title: string;
+  description: string | null;
+  date_start: string;
+  date_end: string | null;
+  time_start: string | null;
+  time_end: string | null;
+  location: string | null;
+  category: string;
+  featured: boolean;
+  max_attendees: number | null;
+}
 
 const Home = () => {
+  const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchEvents();
+  }, []);
+
+  const fetchEvents = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('events')
+        .select('*')
+        .gte('date_start', new Date().toISOString().split('T')[0])
+        .order('date_start', { ascending: true })
+        .limit(3);
+
+      if (error) throw error;
+      setUpcomingEvents(data || []);
+    } catch (error) {
+      console.error('Error fetching events:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case 'Social':
+        return 'bg-secondary/20 text-secondary-foreground';
+      case 'Educational':
+        return 'bg-primary/20 text-primary';
+      case 'Special Event':
+        return 'bg-red-100 text-red-800';
+      case 'Community Service':
+        return 'bg-green-100 text-green-800';
+      default:
+        return 'bg-muted text-muted-foreground';
+    }
+  };
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -96,55 +153,44 @@ const Home = () => {
             <p className="text-lg text-muted-foreground">Join us for these exciting upcoming activities</p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            <Card className="card-elegant overflow-hidden">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <span className="bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm font-medium">
-                    Dec 15
-                  </span>
-                  <Star className="w-5 h-5 text-secondary" />
-                </div>
-                <h3 className="text-xl font-semibold text-primary mb-2">Monthly Social Gathering</h3>
-                <p className="text-muted-foreground mb-4">Join us for coffee, conversation, and community updates in our monthly social meeting.</p>
-                <div className="text-sm text-muted-foreground">
-                  <p>📍 Community Center • 2:00 PM</p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="card-elegant overflow-hidden">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <span className="bg-secondary text-secondary-foreground px-3 py-1 rounded-full text-sm font-medium">
-                    Dec 20
-                  </span>
-                  <Star className="w-5 h-5 text-secondary" />
-                </div>
-                <h3 className="text-xl font-semibold text-primary mb-2">Holiday Celebration</h3>
-                <p className="text-muted-foreground mb-4">Celebrate the holiday season with festive activities, refreshments, and good cheer.</p>
-                <div className="text-sm text-muted-foreground">
-                  <p>📍 Main Hall • 6:00 PM</p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="card-elegant overflow-hidden">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <span className="bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm font-medium">
-                    Jan 8
-                  </span>
-                  <Star className="w-5 h-5 text-secondary" />
-                </div>
-                <h3 className="text-xl font-semibold text-primary mb-2">Guest Speaker Series</h3>
-                <p className="text-muted-foreground mb-4">Fascinating talk on local history and heritage by renowned historian Dr. Sarah Williams.</p>
-                <div className="text-sm text-muted-foreground">
-                  <p>📍 Conference Room • 7:00 PM</p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          {loading ? (
+            <div className="text-center py-8">Loading events...</div>
+          ) : upcomingEvents.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">No upcoming events scheduled at the moment.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+              {upcomingEvents.map((event) => (
+                <Card key={event.id} className="card-elegant overflow-hidden hover:scale-105 transition-smooth">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${getCategoryColor(event.category)}`}>
+                        {format(new Date(event.date_start), 'MMM d')}
+                      </span>
+                      {event.featured && <Star className="w-5 h-5 text-secondary" />}
+                    </div>
+                    <h3 className="text-xl font-semibold text-primary mb-2">{event.title}</h3>
+                    <p className="text-muted-foreground mb-4">{event.description}</p>
+                    <div className="space-y-1 text-sm text-muted-foreground">
+                      {event.time_start && (
+                        <div className="flex items-center">
+                          <Clock className="w-4 h-4 mr-2 text-primary" />
+                          {event.time_start} {event.time_end && `- ${event.time_end}`}
+                        </div>
+                      )}
+                      {event.location && (
+                        <div className="flex items-center">
+                          <MapPin className="w-4 h-4 mr-2 text-primary" />
+                          {event.location}
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
           
           <div className="text-center">
             <Button asChild variant="outline" size="lg" className="text-primary border-primary hover:bg-primary hover:text-primary-foreground">
