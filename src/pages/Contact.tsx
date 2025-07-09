@@ -60,15 +60,15 @@ const Contact = () => {
     {
       icon: MapPin,
       title: "Meeting Location",
-      primary: "Kensington Community Center",
-      secondary: "123 Main Street, Kensington",
+      primary: "St Matthews church",
+      secondary: "146 Kensington Road Marryatville SA 5069",
       description: "Where we gather monthly"
     },
     {
       icon: Clock,
       title: "Meeting Times",
-      primary: "2nd Tuesday of each month",
-      secondary: "2:00 PM - 4:00 PM",
+      primary: "2nd Monday of each month",
+      secondary: "except when public holiday, then 3rd Monday (10am to 12)",
       description: "Regular meeting schedule"
     }
   ];
@@ -259,7 +259,7 @@ const Contact = () => {
           </div>
           
           <div className="mt-6 text-sm text-muted-foreground">
-            <p>Next Meeting: <strong>Tuesday, December 15th at 2:00 PM</strong></p>
+            <p>Next Meeting: <strong>Monday at 10:00 AM</strong></p>
           </div>
         </div>
       </div>

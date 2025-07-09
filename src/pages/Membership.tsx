@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Check, Users, Calendar, Coffee, Heart, Mail, Phone, FileText, CreditCard } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Membership = () => {
   const membershipTypes = [
@@ -181,9 +182,11 @@ const Membership = () => {
           </div>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" variant="default">
-              <Mail className="w-4 h-4 mr-2" />
-              Contact Us
+            <Button size="lg" variant="default" asChild>
+              <Link to="/contact" onClick={() => window.scrollTo(0, 0)}>
+                <Mail className="w-4 h-4 mr-2" />
+                Contact Us
+              </Link>
             </Button>
             <Button size="lg" variant="outline" asChild>
               <a href="/membership-application">

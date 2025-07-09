@@ -33,7 +33,7 @@ const Footer = () => {
               </div>
               <div className="flex items-center space-x-3">
                 <MapPin className="w-4 h-4 text-secondary" />
-                <span className="text-primary-foreground/80">Kensington Community Center</span>
+                <span className="text-primary-foreground/80">St Matthews church, 146 Kensington Road Marryatville SA 5069</span>
               </div>
             </div>
           </div>

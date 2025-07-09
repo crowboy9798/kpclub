@@ -194,7 +194,7 @@ const Home = () => {
           
           <div className="text-center">
             <Button asChild variant="outline" size="lg" className="text-primary border-primary hover:bg-primary hover:text-primary-foreground">
-              <Link to="/events">
+              <Link to="/events" onClick={() => window.scrollTo(0, 0)}>
                 View All Events
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Link>
