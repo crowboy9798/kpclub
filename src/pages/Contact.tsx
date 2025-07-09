@@ -46,14 +46,14 @@ const Contact = () => {
     {
       icon: Mail,
       title: "Email Address",
-      primary: "info@kensingtonprobus.com",
+      primary: "kensingtonprobusclub@gmail.com",
       secondary: "membership@kensingtonprobus.com",
       description: "Send us an email anytime"
     },
     {
       icon: Phone,
       title: "Phone Number",
-      primary: "(555) 123-4567",
+      primary: "0417803220",
       secondary: "Available Mon-Fri, 9AM-5PM",
       description: "Call us during business hours"
     },

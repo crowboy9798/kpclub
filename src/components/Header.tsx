@@ -23,8 +23,8 @@ const Header = () => {
         <div className="flex justify-between items-center py-4">
           {/* Logo and Club Name */}
           <Link to="/" className="flex items-center space-x-3 group">
-            <div className="w-12 h-12 bg-secondary rounded-full flex items-center justify-center shadow-glow transition-smooth group-hover:scale-105">
-              <Users className="w-6 h-6 text-secondary-foreground" />
+            <div className="w-12 h-12 rounded-full flex items-center justify-center shadow-glow transition-smooth group-hover:scale-105">
+              <img src="/lovable-uploads/a6d3b80c-ee71-454e-989a-d2fd3a8a98ef.png" alt="Probus Logo" className="w-12 h-12 rounded-full" />
             </div>
             <div>
               <h1 className="text-xl font-bold text-primary-foreground">Kensington Probus Club</h1>

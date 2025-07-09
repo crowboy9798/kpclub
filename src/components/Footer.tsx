@@ -8,8 +8,8 @@ const Footer = () => {
           {/* Club Info */}
           <div>
             <div className="flex items-center space-x-3 mb-4">
-              <div className="w-10 h-10 bg-secondary rounded-full flex items-center justify-center">
-                <Users className="w-5 h-5 text-secondary-foreground" />
+              <div className="w-10 h-10 rounded-full flex items-center justify-center">
+                <img src="/lovable-uploads/a6d3b80c-ee71-454e-989a-d2fd3a8a98ef.png" alt="Probus Logo" className="w-10 h-10 rounded-full" />
               </div>
               <h3 className="text-lg font-semibold">Kensington Probus Club</h3>
             </div>
@@ -25,11 +25,11 @@ const Footer = () => {
             <div className="space-y-3">
               <div className="flex items-center space-x-3">
                 <Mail className="w-4 h-4 text-secondary" />
-                <span className="text-primary-foreground/80">info@kensingtonprobus.com</span>
+                <span className="text-primary-foreground/80">kensingtonprobusclub@gmail.com</span>
               </div>
               <div className="flex items-center space-x-3">
                 <Phone className="w-4 h-4 text-secondary" />
-                <span className="text-primary-foreground/80">(555) 123-4567</span>
+                <span className="text-primary-foreground/80">0417803220</span>
               </div>
               <div className="flex items-center space-x-3">
                 <MapPin className="w-4 h-4 text-secondary" />

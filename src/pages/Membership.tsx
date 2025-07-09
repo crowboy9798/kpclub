@@ -173,11 +173,11 @@ const Membership = () => {
           <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-8">
             <div className="flex items-center text-muted-foreground">
               <Mail className="w-5 h-5 text-primary mr-2" />
-              <span>info@kensingtonprobus.com</span>
+              <span>kensingtonprobusclub@gmail.com</span>
             </div>
             <div className="flex items-center text-muted-foreground">
               <Phone className="w-5 h-5 text-primary mr-2" />
-              <span>(555) 123-4567</span>
+              <span>0417803220</span>
             </div>
           </div>
           
