@@ -328,7 +328,7 @@ const MembershipApplication = () => {
                   (The Emergency Contact person should not be a member of the Club)
                 </p>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <Label htmlFor="emergencyContactName">In case of emergency, please contact *</Label>
                     <Input
@@ -347,11 +347,8 @@ const MembershipApplication = () => {
                       required
                     />
                   </div>
-                </div>
-
-                <div className="grid grid-cols-1 gap-4">
                   <div>
-                    <Label htmlFor="emergencyContactPhone">Emergency Contact Telephone</Label>
+                    <Label htmlFor="emergencyContactPhone">Phone No.</Label>
                     <Input
                       id="emergencyContactPhone"
                       type="tel"
