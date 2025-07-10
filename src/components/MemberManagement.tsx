@@ -35,7 +35,8 @@ const MemberManagement = () => {
     dob: '',
     nok: '',
     nok_name: '',
-    nok_contact: ''
+    nok_contact: '',
+    member_no: ''
   });
 
   useEffect(() => {
@@ -69,9 +70,10 @@ const MemberManagement = () => {
         address: item.Address,
         suburb: item.Suburb,
         pcode: item.Pcode,
-        nok: item.NOK,
+        nok: item.NOK_relationship,
         nok_name: item.NOK_NAME,
-        nok_contact: item.NOK_Contact
+        nok_contact: item.NOK_Contact,
+        member_groups: item['Member_groups:'] || []
       })) || [];
       
       setMembers(mappedData);
@@ -101,13 +103,9 @@ const MemberManagement = () => {
         Suburb: formData.suburb || null,
         Pcode: formData.pcode || null,
         DOB: formData.dob || null,
-        NOK: formData.nok || null,
+        NOK_relationship: formData.nok || null,
         NOK_NAME: formData.nok_name || null,
-        NOK_Contact: formData.nok_contact || null,
-        Member_2025: 'YES' as const,
-        Member_2024: 'NO' as const,
-        Member_No: `290043810${String(Date.now()).slice(-3)}`,
-        Joined: new Date().toISOString().split('T')[0]
+        NOK_Contact: formData.nok_contact || null
       };
 
       const { error } = await supabase
@@ -149,9 +147,10 @@ const MemberManagement = () => {
         Suburb: formData.suburb || null,
         Pcode: formData.pcode || null,
         DOB: formData.dob || null,
-        NOK: formData.nok || null,
+        NOK_relationship: formData.nok || null,
         NOK_NAME: formData.nok_name || null,
-        NOK_Contact: formData.nok_contact || null
+        NOK_Contact: formData.nok_contact || null,
+        Member_No: formData.member_no || null
       };
 
       const { error } = await supabase
@@ -222,7 +221,8 @@ const MemberManagement = () => {
       dob: '',
       nok: '',
       nok_name: '',
-      nok_contact: ''
+      nok_contact: '',
+      member_no: ''
     });
   };
 
@@ -239,7 +239,8 @@ const MemberManagement = () => {
       dob: member.dob || '',
       nok: member.nok || '',
       nok_name: member.nok_name || '',
-      nok_contact: member.nok_contact || ''
+      nok_contact: member.nok_contact || '',
+      member_no: member.member_no || ''
     });
   };
 
@@ -591,10 +592,9 @@ const MemberManagement = () => {
                    </TableHead>
                    <TableHead>Name</TableHead>
                    <TableHead>Member No.</TableHead>
-                   <TableHead>Status</TableHead>
-                   <TableHead>Email</TableHead>
-                   <TableHead>Mobile</TableHead>
-                   <TableHead>Suburb</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Mobile</TableHead>
+                    <TableHead>Groups</TableHead>
                    <TableHead>Actions</TableHead>
                  </TableRow>
                </TableHeader>
@@ -613,13 +613,10 @@ const MemberManagement = () => {
                        <TableCell className="font-medium">
                          {member.first_name} {member.last_name}
                        </TableCell>
-                      <TableCell>{member.member_no}</TableCell>
-                      <TableCell>
-                        <Badge variant={status.variant}>{status.text}</Badge>
-                      </TableCell>
-                      <TableCell>{member.email || '-'}</TableCell>
-                      <TableCell>{member.mobile || '-'}</TableCell>
-                      <TableCell>{member.suburb || '-'}</TableCell>
+                       <TableCell>{member.member_no}</TableCell>
+                       <TableCell>{member.email || '-'}</TableCell>
+                       <TableCell>{member.mobile || '-'}</TableCell>
+                       <TableCell>{member.member_groups?.join(', ') || '-'}</TableCell>
                       <TableCell>
                         <div className="flex gap-2">
                           <Button
@@ -771,6 +768,18 @@ const MemberManagement = () => {
                 placeholder="Phone number"
               />
             </div>
+
+            {editingMember && (
+              <div>
+                <Label htmlFor="member_no">Member Number</Label>
+                <Input
+                  id="member_no"
+                  value={formData.member_no}
+                  onChange={(e) => setFormData({ ...formData, member_no: e.target.value })}
+                  placeholder="Member number"
+                />
+              </div>
+            )}
 
             <div className="flex justify-end gap-2 pt-4">
               <Button

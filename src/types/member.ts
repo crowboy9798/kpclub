@@ -15,6 +15,7 @@ export interface Member {
   nok: string | null;
   nok_name: string | null;
   nok_contact: string | null;
+  member_groups?: string[];
   created_at?: string;
   updated_at?: string;
 }
@@ -31,4 +32,5 @@ export interface MemberFormData {
   nok: string;
   nok_name: string;
   nok_contact: string;
+  member_no: string;
 }

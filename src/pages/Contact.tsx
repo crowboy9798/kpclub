@@ -239,28 +239,12 @@ const Contact = () => {
           </div>
         </div>
 
-        {/* Visit Us Section */}
+        {/* Meeting Times Section */}
         <div className="mt-16 gradient-card rounded-xl p-8 text-center">
-          <h2 className="text-2xl font-semibold text-primary mb-4">Visit Us at Our Next Meeting</h2>
-          <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-            The best way to get to know our club is to attend one of our meetings. Visitors are always 
-            welcome, and there's no obligation to join. Come see what we're all about!
+          <h2 className="text-2xl font-semibold text-primary mb-4">Meeting Times</h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            2nd Monday of each month St Matthews Church, 146 Kensington Rd, Marryatville SA (10am to 12) except when public holiday, then 3rd Monday (10am to 12)
           </p>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" variant="default">
-              <Calendar className="w-4 h-4 mr-2" />
-              View Meeting Schedule
-            </Button>
-            <Button size="lg" variant="outline">
-              <MapPin className="w-4 h-4 mr-2" />
-              Get Directions
-            </Button>
-          </div>
-          
-          <div className="mt-6 text-sm text-muted-foreground">
-            <p>Next Meeting: <strong>Monday at 10:00 AM</strong></p>
-          </div>
         </div>
       </div>
     </div>

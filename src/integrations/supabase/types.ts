@@ -77,13 +77,12 @@ export type Database = {
           ID: string
           Joined: string | null
           Last_Name: string | null
-          Member_2024: string | null
-          Member_2025: string | null
+          "Member_groups:": string[] | null
           Member_No: string | null
           Mobile: string | null
-          NOK: string | null
           NOK_Contact: string | null
           NOK_NAME: string | null
+          NOK_relationship: string | null
           Pcode: string | null
           Suburb: string | null
         }
@@ -95,13 +94,12 @@ export type Database = {
           ID: string
           Joined?: string | null
           Last_Name?: string | null
-          Member_2024?: string | null
-          Member_2025?: string | null
+          "Member_groups:"?: string[] | null
           Member_No?: string | null
           Mobile?: string | null
-          NOK?: string | null
           NOK_Contact?: string | null
           NOK_NAME?: string | null
+          NOK_relationship?: string | null
           Pcode?: string | null
           Suburb?: string | null
         }
@@ -113,13 +111,12 @@ export type Database = {
           ID?: string
           Joined?: string | null
           Last_Name?: string | null
-          Member_2024?: string | null
-          Member_2025?: string | null
+          "Member_groups:"?: string[] | null
           Member_No?: string | null
           Mobile?: string | null
-          NOK?: string | null
           NOK_Contact?: string | null
           NOK_NAME?: string | null
+          NOK_relationship?: string | null
           Pcode?: string | null
           Suburb?: string | null
         }

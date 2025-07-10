@@ -183,6 +183,14 @@ const Admin = () => {
               <Card className="card-elegant">
                 <CardContent className="p-6 text-center">
                   <Users className="w-8 h-8 text-primary mx-auto mb-2" />
+                  <div className="text-2xl font-bold text-primary">89</div>
+                  <div className="text-sm text-muted-foreground">Database</div>
+                </CardContent>
+              </Card>
+              
+              <Card className="card-elegant">
+                <CardContent className="p-6 text-center">
+                  <Calendar className="w-8 h-8 text-secondary-foreground mx-auto mb-2" />
                   <div className="text-2xl font-bold text-primary">53</div>
                   <div className="text-sm text-muted-foreground">Active Members</div>
                 </CardContent>
@@ -190,25 +198,17 @@ const Admin = () => {
               
               <Card className="card-elegant">
                 <CardContent className="p-6 text-center">
-                  <Calendar className="w-8 h-8 text-secondary-foreground mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-primary">6</div>
-                  <div className="text-sm text-muted-foreground">Upcoming Events</div>
-                </CardContent>
-              </Card>
-              
-              <Card className="card-elegant">
-                <CardContent className="p-6 text-center">
                   <Mail className="w-8 h-8 text-primary mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-primary">12</div>
-                  <div className="text-sm text-muted-foreground">New Messages</div>
+                  <div className="text-2xl font-bold text-primary">36</div>
+                  <div className="text-sm text-muted-foreground">Inactive Members</div>
                 </CardContent>
               </Card>
               
               <Card className="card-elegant">
                 <CardContent className="p-6 text-center">
                   <Settings className="w-8 h-8 text-secondary-foreground mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-primary">3</div>
-                  <div className="text-sm text-muted-foreground">Pending Tasks</div>
+                  <div className="text-2xl font-bold text-primary">6</div>
+                  <div className="text-sm text-muted-foreground">Events</div>
                 </CardContent>
               </Card>
             </div>
@@ -263,49 +263,6 @@ const Admin = () => {
           <EventManagement />
         )}
 
-        {/* Recent Activity */}
-        <div className="mt-8">
-          <Card className="card-elegant">
-            <CardHeader>
-              <CardTitle className="text-primary">Recent Activity</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between py-2 border-b border-border">
-                  <div>
-                    <p className="font-medium">New member registration</p>
-                    <p className="text-sm text-muted-foreground">Sarah Johnson joined the club</p>
-                  </div>
-                  <span className="text-sm text-muted-foreground">2 hours ago</span>
-                </div>
-                
-                <div className="flex items-center justify-between py-2 border-b border-border">
-                  <div>
-                    <p className="font-medium">Event updated</p>
-                    <p className="text-sm text-muted-foreground">Holiday Celebration details modified</p>
-                  </div>
-                  <span className="text-sm text-muted-foreground">1 day ago</span>
-                </div>
-                
-                <div className="flex items-center justify-between py-2 border-b border-border">
-                  <div>
-                    <p className="font-medium">Contact form submission</p>
-                    <p className="text-sm text-muted-foreground">New inquiry about membership</p>
-                  </div>
-                  <span className="text-sm text-muted-foreground">2 days ago</span>
-                </div>
-                
-                <div className="flex items-center justify-between py-2">
-                  <div>
-                    <p className="font-medium">Newsletter sent</p>
-                    <p className="text-sm text-muted-foreground">December newsletter delivered to 127 members</p>
-                  </div>
-                  <span className="text-sm text-muted-foreground">3 days ago</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
       </div>
     </div>
   );
