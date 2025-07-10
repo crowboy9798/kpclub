@@ -63,13 +63,13 @@ const Admin = () => {
         .from('KPC2')
         .select('*', { count: 'exact', head: true });
 
-      // Active members (with 2025 in Member_groups array)
+      // Active members (records with 2025 in Member_groups array)
       const { count: activeCount } = await supabase
         .from('KPC2')
         .select('*', { count: 'exact', head: true })
         .contains('Member_groups:', ['2025']);
 
-      // Inactive members (with LTL in Member_groups array)
+      // Inactive members (records with LTL in Member_groups array)
       const { count: inactiveCount } = await supabase
         .from('KPC2')
         .select('*', { count: 'exact', head: true })
