@@ -217,7 +217,7 @@ const Home = () => {
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Link>
             </Button>
-            <Button asChild size="lg" variant="outline" className="text-lg px-8 py-3 border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary">
+            <Button asChild size="lg" variant="outline" className="text-lg px-8 py-3 border-primary-foreground text-primary bg-primary-foreground">
               <Link to="/contact">
                 Contact Us
               </Link>

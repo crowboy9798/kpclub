@@ -105,7 +105,8 @@ const MemberManagement = () => {
         DOB: formData.dob || null,
         NOK_relationship: formData.nok || null,
         NOK_NAME: formData.nok_name || null,
-        NOK_Contact: formData.nok_contact || null
+        NOK_Contact: formData.nok_contact || null,
+        Member_No: formData.member_no || null
       };
 
       const { error } = await supabase
@@ -739,14 +740,14 @@ const MemberManagement = () => {
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <Label htmlFor="nok">Next of Kin Relationship</Label>
+                <Label htmlFor="nok">Relationship</Label>
                 <Input
                   id="nok"
                   value={formData.nok}
                   onChange={(e) => setFormData({ ...formData, nok: e.target.value })}
-                  placeholder="e.g., Spouse, Daughter, Son"
+                  placeholder="e.g., Spouse"
                 />
               </div>
               <div>
@@ -757,29 +758,26 @@ const MemberManagement = () => {
                   onChange={(e) => setFormData({ ...formData, nok_name: e.target.value })}
                 />
               </div>
+              <div>
+                <Label htmlFor="nok_contact">Phone No.</Label>
+                <Input
+                  id="nok_contact"
+                  value={formData.nok_contact}
+                  onChange={(e) => setFormData({ ...formData, nok_contact: e.target.value })}
+                  placeholder="Phone"
+                />
+              </div>
             </div>
 
             <div>
-              <Label htmlFor="nok_contact">Next of Kin Contact</Label>
+              <Label htmlFor="member_no">Member Number</Label>
               <Input
-                id="nok_contact"
-                value={formData.nok_contact}
-                onChange={(e) => setFormData({ ...formData, nok_contact: e.target.value })}
-                placeholder="Phone number"
+                id="member_no"
+                value={formData.member_no}
+                onChange={(e) => setFormData({ ...formData, member_no: e.target.value })}
+                placeholder="Member number"
               />
             </div>
-
-            {editingMember && (
-              <div>
-                <Label htmlFor="member_no">Member Number</Label>
-                <Input
-                  id="member_no"
-                  value={formData.member_no}
-                  onChange={(e) => setFormData({ ...formData, member_no: e.target.value })}
-                  placeholder="Member number"
-                />
-              </div>
-            )}
 
             <div className="flex justify-end gap-2 pt-4">
               <Button
