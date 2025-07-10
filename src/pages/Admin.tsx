@@ -3,8 +3,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Shield, Lock, Users, Calendar, Settings, Mail } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import MemberManagement from '@/components/MemberManagement';
 import EventManagement from '@/components/EventManagement';
 
@@ -16,6 +17,12 @@ const Admin = () => {
     password: ''
   });
   const [activeTab, setActiveTab] = useState<'dashboard' | 'members' | 'events'>('dashboard');
+  const [stats, setStats] = useState({
+    database: 0,
+    activeMembers: 0,
+    inactiveMembers: 0,
+    events: 0
+  });
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,6 +50,46 @@ const Admin = () => {
     });
   };
 
+  useEffect(() => {
+    if (isLoggedIn) {
+      fetchStats();
+    }
+  }, [isLoggedIn]);
+
+  const fetchStats = async () => {
+    try {
+      // Database total count
+      const { count: databaseCount } = await supabase
+        .from('KPC2')
+        .select('*', { count: 'exact', head: true });
+
+      // Active members (with 2025 in Member_groups)
+      const { count: activeCount } = await supabase
+        .from('KPC2')
+        .select('*', { count: 'exact', head: true })
+        .contains('Member_groups:', ['2025']);
+
+      // Inactive members (with LTL in Member_groups)
+      const { count: inactiveCount } = await supabase
+        .from('KPC2')
+        .select('*', { count: 'exact', head: true })
+        .contains('Member_groups:', ['LTL']);
+
+      // Events count
+      const { count: eventsCount } = await supabase
+        .from('events')
+        .select('*', { count: 'exact', head: true });
+
+      setStats({
+        database: databaseCount || 0,
+        activeMembers: activeCount || 0,
+        inactiveMembers: inactiveCount || 0,
+        events: eventsCount || 0
+      });
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+    }
+  };
 
   const adminFeatures = [
     {
@@ -183,7 +230,7 @@ const Admin = () => {
               <Card className="card-elegant">
                 <CardContent className="p-6 text-center">
                   <Users className="w-8 h-8 text-primary mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-primary">89</div>
+                  <div className="text-2xl font-bold text-primary">{stats.database}</div>
                   <div className="text-sm text-muted-foreground">Database</div>
                 </CardContent>
               </Card>
@@ -191,7 +238,7 @@ const Admin = () => {
               <Card className="card-elegant">
                 <CardContent className="p-6 text-center">
                   <Calendar className="w-8 h-8 text-secondary-foreground mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-primary">53</div>
+                  <div className="text-2xl font-bold text-primary">{stats.activeMembers}</div>
                   <div className="text-sm text-muted-foreground">Active Members</div>
                 </CardContent>
               </Card>
@@ -199,7 +246,7 @@ const Admin = () => {
               <Card className="card-elegant">
                 <CardContent className="p-6 text-center">
                   <Mail className="w-8 h-8 text-primary mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-primary">36</div>
+                  <div className="text-2xl font-bold text-primary">{stats.inactiveMembers}</div>
                   <div className="text-sm text-muted-foreground">Inactive Members</div>
                 </CardContent>
               </Card>
@@ -207,7 +254,7 @@ const Admin = () => {
               <Card className="card-elegant">
                 <CardContent className="p-6 text-center">
                   <Settings className="w-8 h-8 text-secondary-foreground mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-primary">6</div>
+                  <div className="text-2xl font-bold text-primary">{stats.events}</div>
                   <div className="text-sm text-muted-foreground">Events</div>
                 </CardContent>
               </Card>
