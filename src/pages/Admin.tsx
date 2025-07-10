@@ -67,13 +67,13 @@ const Admin = () => {
       const { count: activeCount } = await supabase
         .from('KPC2')
         .select('*', { count: 'exact', head: true })
-        .contains('Member_groups:', ['2025']);
+        .overlaps('Member_groups:', ['2025']);
 
       // Inactive members (records with LTL in Member_groups: array)
       const { count: inactiveCount } = await supabase
         .from('KPC2')
         .select('*', { count: 'exact', head: true })
-        .contains('Member_groups:', ['LTL']);
+        .overlaps('Member_groups:', ['LTL']);
 
       // Events count
       const { count: eventsCount } = await supabase
