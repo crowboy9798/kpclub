@@ -256,11 +256,16 @@ const MemberManagement = () => {
 
   const getSortIcon = (key: 'name' | 'id' | 'member_no') => {
     if (!sortConfig || sortConfig.key !== key) {
-      return null;
+      return (
+        <div className="flex flex-col ml-1">
+          <ChevronUp className="w-3 h-3 text-muted-foreground/50" />
+          <ChevronDown className="w-3 h-3 text-muted-foreground/50 -mt-1" />
+        </div>
+      );
     }
     return sortConfig.direction === 'asc' ? 
-      <ChevronUp className="w-4 h-4 ml-1" /> : 
-      <ChevronDown className="w-4 h-4 ml-1" />;
+      <ChevronUp className="w-4 h-4 ml-1 text-primary" /> : 
+      <ChevronDown className="w-4 h-4 ml-1 text-primary" />;
   };
 
   const filteredAndSortedMembers = useMemo(() => {
@@ -605,7 +610,14 @@ const MemberManagement = () => {
       {/* Members Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Database ({filteredAndSortedMembers.length})</CardTitle>
+          <CardTitle>
+            Database ({filteredAndSortedMembers.length})
+            {searchTerm && (
+              <span className="text-sm font-normal text-muted-foreground ml-2">
+                - {filteredAndSortedMembers.length} result{filteredAndSortedMembers.length !== 1 ? 's' : ''} found
+              </span>
+            )}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (
@@ -716,7 +728,7 @@ const MemberManagement = () => {
           resetForm();
         }
       }}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {editingMember ? 'Edit Member' : 'Add New Member'}
