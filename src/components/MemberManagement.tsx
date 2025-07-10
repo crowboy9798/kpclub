@@ -22,7 +22,7 @@ const MemberManagement = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<Member | null>(null);
   const [selectedMembers, setSelectedMembers] = useState<Set<string>>(new Set());
-  const [sortConfig, setSortConfig] = useState<{key: 'name' | 'id' | 'member_no', direction: 'asc' | 'desc'} | null>(null);
+  const [sortConfig, setSortConfig] = useState<{key: 'first_name' | 'last_name' | 'id' | 'member_no', direction: 'asc' | 'desc'} | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [formData, setFormData] = useState<MemberFormData>({
@@ -246,7 +246,7 @@ const MemberManagement = () => {
     });
   };
 
-  const handleSort = (key: 'name' | 'id' | 'member_no') => {
+  const handleSort = (key: 'first_name' | 'last_name' | 'id' | 'member_no') => {
     let direction: 'asc' | 'desc' = 'asc';
     if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
       direction = 'desc';
@@ -254,7 +254,7 @@ const MemberManagement = () => {
     setSortConfig({ key, direction });
   };
 
-  const getSortIcon = (key: 'name' | 'id' | 'member_no') => {
+  const getSortIcon = (key: 'first_name' | 'last_name' | 'id' | 'member_no') => {
     if (!sortConfig || sortConfig.key !== key) {
       return (
         <div className="flex flex-col ml-1">
@@ -296,9 +296,13 @@ const MemberManagement = () => {
         let bValue = '';
         
         switch (sortConfig.key) {
-          case 'name':
-            aValue = `${a.first_name} ${a.last_name}`.toLowerCase();
-            bValue = `${b.first_name} ${b.last_name}`.toLowerCase();
+          case 'first_name':
+            aValue = a.first_name.toLowerCase();
+            bValue = b.first_name.toLowerCase();
+            break;
+          case 'last_name':
+            aValue = a.last_name.toLowerCase();
+            bValue = b.last_name.toLowerCase();
             break;
           case 'id':
             aValue = a.id.toLowerCase();
@@ -642,24 +646,33 @@ const MemberManagement = () => {
                         {getSortIcon('id')}
                       </div>
                     </TableHead>
-                    <TableHead 
-                      className="cursor-pointer select-none"
-                      onClick={() => handleSort('name')}
-                    >
-                      <div className="flex items-center">
-                        Name
-                        {getSortIcon('name')}
-                      </div>
-                    </TableHead>
-                    <TableHead 
-                      className="cursor-pointer select-none"
-                      onClick={() => handleSort('member_no')}
-                    >
-                      <div className="flex items-center">
-                        Member No.
-                        {getSortIcon('member_no')}
-                      </div>
-                    </TableHead>
+                     <TableHead 
+                       className="cursor-pointer select-none"
+                       onClick={() => handleSort('first_name')}
+                     >
+                       <div className="flex items-center">
+                         First Name
+                         {getSortIcon('first_name')}
+                       </div>
+                     </TableHead>
+                     <TableHead 
+                       className="cursor-pointer select-none"
+                       onClick={() => handleSort('last_name')}
+                     >
+                       <div className="flex items-center">
+                         Surname
+                         {getSortIcon('last_name')}
+                       </div>
+                     </TableHead>
+                     <TableHead 
+                       className="cursor-pointer select-none"
+                       onClick={() => handleSort('member_no')}
+                     >
+                       <div className="flex items-center">
+                         Member No.
+                         {getSortIcon('member_no')}
+                       </div>
+                     </TableHead>
                      <TableHead>Email</TableHead>
                      <TableHead>Mobile</TableHead>
                      <TableHead>Groups</TableHead>
@@ -681,15 +694,18 @@ const MemberManagement = () => {
                         <TableCell className="font-mono text-sm">
                           {member.id}
                         </TableCell>
-                        <TableCell className="font-medium">
-                          <button
-                            onClick={() => startEdit(member)}
-                            className="text-primary hover:underline text-left"
-                          >
-                            {member.first_name} {member.last_name}
-                          </button>
-                        </TableCell>
-                        <TableCell>{member.member_no}</TableCell>
+                         <TableCell className="font-medium">
+                           <button
+                             onClick={() => startEdit(member)}
+                             className="text-primary hover:underline text-left"
+                           >
+                             {member.first_name}
+                           </button>
+                         </TableCell>
+                         <TableCell className="font-medium">
+                           {member.last_name}
+                         </TableCell>
+                         <TableCell>{member.member_no}</TableCell>
                         <TableCell>{member.email || '-'}</TableCell>
                         <TableCell>{member.mobile || '-'}</TableCell>
                         <TableCell>{member.member_groups?.join(', ') || '-'}</TableCell>
