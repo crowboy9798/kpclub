@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { Member, MemberFormData } from '@/types/member';
-import { Users, Plus, Upload, Download, Search, Edit, Trash2 } from 'lucide-react';
+import { Users, Plus, Upload, Download, Search, Edit, Trash2, ChevronUp, ChevronDown } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 const MemberManagement = () => {
@@ -21,7 +21,8 @@ const MemberManagement = () => {
   const [filterYear, setFilterYear] = useState<'all' | '2024' | '2025'>('all');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<Member | null>(null);
-  const [selectedMembers, setSelectedMembers] = useState<Set<number>>(new Set());
+  const [selectedMembers, setSelectedMembers] = useState<Set<string>>(new Set());
+  const [sortConfig, setSortConfig] = useState<{key: 'name' | 'id' | 'member_no', direction: 'asc' | 'desc'} | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [formData, setFormData] = useState<MemberFormData>({
@@ -245,20 +246,73 @@ const MemberManagement = () => {
     });
   };
 
-  const filteredMembers = members.filter(member => {
-    const matchesSearch = 
-      member.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      member.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      member.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      member.member_no.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesYear = 
-      filterYear === 'all' ||
-      (filterYear === '2024' && member.member_2024 === 'YES') ||
-      (filterYear === '2025' && member.member_2025 === 'YES');
-    
-    return matchesSearch && matchesYear;
-  });
+  const handleSort = (key: 'name' | 'id' | 'member_no') => {
+    let direction: 'asc' | 'desc' = 'asc';
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const getSortIcon = (key: 'name' | 'id' | 'member_no') => {
+    if (!sortConfig || sortConfig.key !== key) {
+      return null;
+    }
+    return sortConfig.direction === 'asc' ? 
+      <ChevronUp className="w-4 h-4 ml-1" /> : 
+      <ChevronDown className="w-4 h-4 ml-1" />;
+  };
+
+  const filteredAndSortedMembers = useMemo(() => {
+    let filtered = members.filter(member => {
+      const matchesSearch = 
+        member.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        member.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        member.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        member.mobile?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        member.address?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        member.suburb?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        member.pcode?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        member.member_no.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        member.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        member.member_groups?.some(group => group.toLowerCase().includes(searchTerm.toLowerCase()));
+      
+      const matchesYear = 
+        filterYear === 'all' ||
+        (filterYear === '2024' && member.member_2024 === 'YES') ||
+        (filterYear === '2025' && member.member_2025 === 'YES');
+      
+      return matchesSearch && matchesYear;
+    });
+
+    if (sortConfig) {
+      filtered.sort((a, b) => {
+        let aValue = '';
+        let bValue = '';
+        
+        switch (sortConfig.key) {
+          case 'name':
+            aValue = `${a.first_name} ${a.last_name}`.toLowerCase();
+            bValue = `${b.first_name} ${b.last_name}`.toLowerCase();
+            break;
+          case 'id':
+            aValue = a.id.toLowerCase();
+            bValue = b.id.toLowerCase();
+            break;
+          case 'member_no':
+            aValue = a.member_no.toLowerCase();
+            bValue = b.member_no.toLowerCase();
+            break;
+        }
+        
+        if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+        if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+
+    return filtered;
+  }, [members, searchTerm, filterYear, sortConfig]);
 
   const handleImportCSV = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -459,7 +513,7 @@ const MemberManagement = () => {
     return { text: 'Inactive', variant: 'destructive' as const };
   };
 
-  const handleSelectMember = (memberId: number) => {
+  const handleSelectMember = (memberId: string) => {
     const newSelected = new Set(selectedMembers);
     if (newSelected.has(memberId)) {
       newSelected.delete(memberId);
@@ -470,10 +524,10 @@ const MemberManagement = () => {
   };
 
   const handleSelectAll = () => {
-    if (selectedMembers.size === filteredMembers.length) {
+    if (selectedMembers.size === filteredAndSortedMembers.length) {
       setSelectedMembers(new Set());
     } else {
-      setSelectedMembers(new Set(filteredMembers.map(m => m.id)));
+      setSelectedMembers(new Set(filteredAndSortedMembers.map(m => m.id)));
     }
   };
 
@@ -533,7 +587,7 @@ const MemberManagement = () => {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                 <Input
-                  placeholder="Search members..."
+                  placeholder="Search all fields..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -544,30 +598,6 @@ const MemberManagement = () => {
             <Button variant="outline" className="whitespace-nowrap">
               Go
             </Button>
-
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground whitespace-nowrap">
-                {selectedMembers.size > 0 ? `${selectedMembers.size} selected` : 'SELECT GROUP'}
-              </span>
-              <Select disabled={selectedMembers.size === 0}>
-                <SelectTrigger className="w-48">
-                  <SelectValue placeholder="Add to group" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="member-2024">Member 2024</SelectItem>
-                  <SelectItem value="member-2025">Member 2025</SelectItem>
-                  <SelectItem value="new-group">NEW GROUP</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={clearSelection}
-                disabled={selectedMembers.size === 0}
-              >
-                Clear
-              </Button>
-            </div>
           </div>
         </CardContent>
       </Card>
@@ -575,7 +605,7 @@ const MemberManagement = () => {
       {/* Members Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Members ({filteredMembers.length})</CardTitle>
+          <CardTitle>Database ({filteredAndSortedMembers.length})</CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (
@@ -585,39 +615,72 @@ const MemberManagement = () => {
                <TableHeader>
                  <TableRow>
                    <TableHead className="w-12">
-                     <Checkbox
-                       checked={selectedMembers.size === filteredMembers.length && filteredMembers.length > 0}
-                       onCheckedChange={handleSelectAll}
-                       aria-label="Select all members"
-                     />
-                   </TableHead>
-                   <TableHead>Name</TableHead>
-                   <TableHead>Member No.</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Mobile</TableHead>
-                    <TableHead>Groups</TableHead>
-                   <TableHead>Actions</TableHead>
-                 </TableRow>
-               </TableHeader>
-              <TableBody>
-                 {filteredMembers.map((member) => {
+                      <Checkbox
+                        checked={selectedMembers.size === filteredAndSortedMembers.length && filteredAndSortedMembers.length > 0}
+                        onCheckedChange={handleSelectAll}
+                        aria-label="Select all members"
+                      />
+                    </TableHead>
+                    <TableHead 
+                      className="cursor-pointer select-none"
+                      onClick={() => handleSort('id')}
+                    >
+                      <div className="flex items-center">
+                        ID
+                        {getSortIcon('id')}
+                      </div>
+                    </TableHead>
+                    <TableHead 
+                      className="cursor-pointer select-none"
+                      onClick={() => handleSort('name')}
+                    >
+                      <div className="flex items-center">
+                        Name
+                        {getSortIcon('name')}
+                      </div>
+                    </TableHead>
+                    <TableHead 
+                      className="cursor-pointer select-none"
+                      onClick={() => handleSort('member_no')}
+                    >
+                      <div className="flex items-center">
+                        Member No.
+                        {getSortIcon('member_no')}
+                      </div>
+                    </TableHead>
+                     <TableHead>Email</TableHead>
+                     <TableHead>Mobile</TableHead>
+                     <TableHead>Groups</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+               <TableBody>
+                  {filteredAndSortedMembers.map((member) => {
                    const status = getMembershipStatus(member);
                    return (
                      <TableRow key={member.id}>
-                       <TableCell>
-                         <Checkbox
-                           checked={selectedMembers.has(member.id)}
-                           onCheckedChange={() => handleSelectMember(member.id)}
-                           aria-label={`Select ${member.first_name} ${member.last_name}`}
-                         />
-                       </TableCell>
-                       <TableCell className="font-medium">
-                         {member.first_name} {member.last_name}
-                       </TableCell>
-                       <TableCell>{member.member_no}</TableCell>
-                       <TableCell>{member.email || '-'}</TableCell>
-                       <TableCell>{member.mobile || '-'}</TableCell>
-                       <TableCell>{member.member_groups?.join(', ') || '-'}</TableCell>
+                        <TableCell>
+                          <Checkbox
+                            checked={selectedMembers.has(member.id)}
+                            onCheckedChange={() => handleSelectMember(member.id)}
+                            aria-label={`Select ${member.first_name} ${member.last_name}`}
+                          />
+                        </TableCell>
+                        <TableCell className="font-mono text-sm">
+                          {member.id}
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          <button
+                            onClick={() => startEdit(member)}
+                            className="text-primary hover:underline text-left"
+                          >
+                            {member.first_name} {member.last_name}
+                          </button>
+                        </TableCell>
+                        <TableCell>{member.member_no}</TableCell>
+                        <TableCell>{member.email || '-'}</TableCell>
+                        <TableCell>{member.mobile || '-'}</TableCell>
+                        <TableCell>{member.member_groups?.join(', ') || '-'}</TableCell>
                       <TableCell>
                         <div className="flex gap-2">
                           <Button

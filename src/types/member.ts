@@ -1,5 +1,5 @@
 export interface Member {
-  id: number;
+  id: string;
   first_name: string;
   last_name: string;
   member_2025: 'YES' | 'NO' | 'LTL';
