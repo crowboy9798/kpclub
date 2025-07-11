@@ -269,26 +269,31 @@ const MemberManagement = () => {
   };
 
   const filteredAndSortedMembers = useMemo(() => {
+    console.log('Search term:', searchTerm);
+    console.log('Members count:', members.length);
+    
     let filtered = members.filter(member => {
       const matchesSearch = 
-        member.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        member.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        member.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        member.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         member.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         member.mobile?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         member.address?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         member.suburb?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         member.pcode?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        member.member_no.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        member.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        member.member_no?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        member.id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         member.member_groups?.some(group => group.toLowerCase().includes(searchTerm.toLowerCase()));
       
       const matchesYear = 
         filterYear === 'all' ||
-        (filterYear === '2024' && member.member_2024 === 'YES') ||
-        (filterYear === '2025' && member.member_2025 === 'YES');
+        (filterYear === '2024' && member.member_groups?.includes('2024')) ||
+        (filterYear === '2025' && member.member_groups?.includes('2025'));
       
       return matchesSearch && matchesYear;
     });
+    
+    console.log('Filtered results:', filtered.length);
 
     if (sortConfig) {
       filtered.sort((a, b) => {
