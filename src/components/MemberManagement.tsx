@@ -715,6 +715,13 @@ const MemberManagement = () => {
     console.log(`Sending emails to ${recipients.length} recipients`);
 
     try {
+      console.log('Calling send-bulk-email function with:', {
+        recipientCount: recipients.length,
+        subject: emailForm.subject,
+        fromEmail: emailForm.fromEmail,
+        fromName: emailForm.fromName
+      });
+
       const { data, error } = await supabase.functions.invoke('send-bulk-email', {
         body: {
           recipients,
@@ -725,8 +732,11 @@ const MemberManagement = () => {
         }
       });
 
+      console.log('Function response:', { data, error });
+
       if (error) {
-        throw error;
+        console.error('Supabase function error:', error);
+        throw new Error(`Function call failed: ${error.message || JSON.stringify(error)}`);
       }
 
       toast({
@@ -844,18 +854,30 @@ const MemberManagement = () => {
               </Button>
             </div>
             
-            <div className="w-full sm:w-48">
-              <Select value={filterGroup} onValueChange={(value: any) => setFilterGroup(value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Filter by group" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Groups</SelectItem>
-                  {availableGroups.map(group => (
-                    <SelectItem key={group} value={group}>{group}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="flex gap-2 items-center">
+              <div className="w-full sm:w-48">
+                <Select value={filterGroup} onValueChange={(value: any) => setFilterGroup(value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Filter by group" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Groups</SelectItem>
+                    {availableGroups.map(group => (
+                      <SelectItem key={group} value={group}>{group}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsAddGroupDialogOpen(true)}
+                className="whitespace-nowrap"
+              >
+                <Plus className="w-4 h-4 mr-1" />
+                Add Group
+              </Button>
             </div>
             
           </div>
@@ -1279,6 +1301,48 @@ const MemberManagement = () => {
               </Button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Group Dialog */}
+      <Dialog open={isAddGroupDialogOpen} onOpenChange={setIsAddGroupDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add New Group</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="groupName">Group Name</Label>
+              <Input
+                id="groupName"
+                value={newGroupName}
+                onChange={(e) => setNewGroupName(e.target.value)}
+                placeholder="Enter group name (e.g., Walking, Cycling)"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleAddGroup();
+                  }
+                }}
+              />
+            </div>
+            
+            <div className="flex justify-end gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setIsAddGroupDialogOpen(false);
+                  setNewGroupName('');
+                }}
+              >
+                Cancel
+              </Button>
+              <Button onClick={handleAddGroup}>
+                Add Group
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
