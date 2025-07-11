@@ -27,6 +27,7 @@ const MemberManagement = () => {
   const [editingMember, setEditingMember] = useState<Member | null>(null);
   const [selectedMembers, setSelectedMembers] = useState<Set<string>>(new Set());
   const [sortConfig, setSortConfig] = useState<{key: 'first_name' | 'last_name' | 'id' | 'member_no', direction: 'asc' | 'desc'} | null>(null);
+  const [editingGroups, setEditingGroups] = useState<{[key: string]: string}>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [formData, setFormData] = useState<MemberFormData>({
@@ -249,6 +250,76 @@ const MemberManagement = () => {
         variant: "destructive"
       });
     }
+  };
+
+  const handleGroupsEdit = (memberId: string, value: string) => {
+    setEditingGroups(prev => ({
+      ...prev,
+      [memberId]: value
+    }));
+  };
+
+  const handleGroupsSave = async (memberId: string) => {
+    const groupsString = editingGroups[memberId];
+    if (groupsString === undefined) return;
+
+    try {
+      // Convert comma-separated string to array, removing empty values
+      const groupsArray = groupsString
+        .split(',')
+        .map(group => group.trim())
+        .filter(group => group.length > 0);
+
+      const { error } = await supabase
+        .from('KPC2')
+        .update({ 'Member_groups:': groupsArray })
+        .eq('ID', memberId);
+
+      if (error) {
+        throw error;
+      }
+
+      // Update local state
+      setMembers(prev => prev.map(member => 
+        member.id === memberId 
+          ? { ...member, member_groups: groupsArray }
+          : member
+      ));
+
+      // Clear editing state
+      setEditingGroups(prev => {
+        const newState = { ...prev };
+        delete newState[memberId];
+        return newState;
+      });
+
+      toast({
+        title: "Groups Updated",
+        description: "Member groups have been updated successfully."
+      });
+    } catch (error) {
+      console.error('Error updating groups:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update member groups. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleGroupsCancel = (memberId: string) => {
+    setEditingGroups(prev => {
+      const newState = { ...prev };
+      delete newState[memberId];
+      return newState;
+    });
+  };
+
+  const startGroupsEdit = (memberId: string, currentGroups: string[]) => {
+    setEditingGroups(prev => ({
+      ...prev,
+      [memberId]: currentGroups.join(', ')
+    }));
   };
 
   const startEdit = (member: Member) => {
@@ -754,7 +825,50 @@ const MemberManagement = () => {
                          <TableCell>{member.member_no}</TableCell>
                         <TableCell>{member.email || '-'}</TableCell>
                         <TableCell>{member.mobile || '-'}</TableCell>
-                        <TableCell>{member.member_groups?.join(', ') || '-'}</TableCell>
+                         <TableCell>
+                           {editingGroups[member.id] !== undefined ? (
+                             <div className="flex gap-2 items-center">
+                               <Input
+                                 value={editingGroups[member.id]}
+                                 onChange={(e) => handleGroupsEdit(member.id, e.target.value)}
+                                 placeholder="Enter groups separated by commas"
+                                 className="text-sm"
+                               />
+                               <Button
+                                 size="sm"
+                                 variant="outline"
+                                 onClick={() => handleGroupsSave(member.id)}
+                               >
+                                 Save
+                               </Button>
+                               <Button
+                                 size="sm"
+                                 variant="ghost"
+                                 onClick={() => handleGroupsCancel(member.id)}
+                               >
+                                 Cancel
+                               </Button>
+                             </div>
+                           ) : (
+                             <div 
+                               className="cursor-pointer hover:bg-muted/50 p-1 rounded min-h-[24px] flex items-center"
+                               onClick={() => startGroupsEdit(member.id, member.member_groups || [])}
+                               title="Click to edit groups"
+                             >
+                               {member.member_groups?.length ? (
+                                 <div className="flex flex-wrap gap-1">
+                                   {member.member_groups.map((group, index) => (
+                                     <Badge key={index} variant="secondary" className="text-xs">
+                                       {group}
+                                     </Badge>
+                                   ))}
+                                 </div>
+                               ) : (
+                                 <span className="text-muted-foreground">Click to add groups</span>
+                               )}
+                             </div>
+                           )}
+                         </TableCell>
                       <TableCell>
                         <div className="flex gap-2">
                           <Button
