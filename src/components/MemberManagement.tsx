@@ -650,45 +650,6 @@ const MemberManagement = () => {
               </Select>
             </div>
             
-            <Dialog open={isAddGroupDialogOpen} onOpenChange={setIsAddGroupDialogOpen}>
-              <DialogTrigger asChild>
-                <Button variant="outline" className="whitespace-nowrap">
-                  <Plus className="w-4 h-4 mr-2" />
-                  ADD NEW GROUP
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-md">
-                <DialogHeader>
-                  <DialogTitle>Add New Group</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="groupName">Group Name</Label>
-                    <Input
-                      id="groupName"
-                      value={newGroupName}
-                      onChange={(e) => setNewGroupName(e.target.value)}
-                      placeholder="Enter group name"
-                      className="mt-1"
-                    />
-                  </div>
-                  <div className="flex justify-end gap-2">
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        setIsAddGroupDialogOpen(false);
-                        setNewGroupName('');
-                      }}
-                    >
-                      Cancel
-                    </Button>
-                    <Button onClick={handleAddGroup}>
-                      Add Group
-                    </Button>
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
           </div>
         </CardContent>
       </Card>
