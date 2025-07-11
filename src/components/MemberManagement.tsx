@@ -819,14 +819,6 @@ const MemberManagement = () => {
                 <Button variant="outline" size="sm" onClick={clearSelection}>
                   Clear Selection
                 </Button>
-                <Dialog open={isEmailDialogOpen} onOpenChange={setIsEmailDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button size="sm">
-                      <Mail className="w-4 h-4 mr-2" />
-                      Send Email
-                    </Button>
-                  </DialogTrigger>
-                </Dialog>
               </div>
             </div>
           </CardContent>
