@@ -17,12 +17,6 @@ const Admin = () => {
     password: ''
   });
   const [activeTab, setActiveTab] = useState<'dashboard' | 'members' | 'events'>('dashboard');
-  const [stats, setStats] = useState({
-    database: 0,
-    activeMembers: 0,
-    inactiveMembers: 0,
-    events: 0
-  });
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,46 +44,6 @@ const Admin = () => {
     });
   };
 
-  useEffect(() => {
-    if (isLoggedIn) {
-      fetchStats();
-    }
-  }, [isLoggedIn]);
-
-  const fetchStats = async () => {
-    try {
-      // Database total count
-      const { count: databaseCount } = await supabase
-        .from('KPC2')
-        .select('*', { count: 'exact', head: true });
-
-      // Active members (records with 2025 in Member_groups: array)
-      const { count: activeCount } = await supabase
-        .from('KPC2')
-        .select('*', { count: 'exact', head: true })
-        .overlaps('Member_groups:', ['2025']);
-
-      // Inactive members (records with LTL in Member_groups: array)
-      const { count: inactiveCount } = await supabase
-        .from('KPC2')
-        .select('*', { count: 'exact', head: true })
-        .overlaps('Member_groups:', ['LTL']);
-
-      // Events count
-      const { count: eventsCount } = await supabase
-        .from('events')
-        .select('*', { count: 'exact', head: true });
-
-      setStats({
-        database: databaseCount || 0,
-        activeMembers: activeCount || 0,
-        inactiveMembers: inactiveCount || 0,
-        events: eventsCount || 0
-      });
-    } catch (error) {
-      console.error('Error fetching stats:', error);
-    }
-  };
 
   const adminFeatures = [
     {
@@ -108,13 +62,13 @@ const Admin = () => {
       icon: Mail,
       title: "Communications",
       description: "Manage newsletters and announcements",
-      actions: ["Send Newsletter", "View Contact Submissions", "Manage Email Lists"]
+      actions: ["Send Newsletter"]
     },
     {
       icon: Settings,
       title: "Site Management",
       description: "Update website content and settings",
-      actions: ["Edit Homepage", "Update Club Info", "Manage Media Files"]
+      actions: ["Edit Homepage", "Update Club Info"]
     }
   ];
 
@@ -225,40 +179,6 @@ const Admin = () => {
 
         {activeTab === 'dashboard' ? (
           <>
-            {/* Quick Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-              <Card className="card-elegant">
-                <CardContent className="p-6 text-center">
-                  <Users className="w-8 h-8 text-primary mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-primary">{stats.database}</div>
-                  <div className="text-sm text-muted-foreground">Database</div>
-                </CardContent>
-              </Card>
-              
-              <Card className="card-elegant">
-                <CardContent className="p-6 text-center">
-                  <Calendar className="w-8 h-8 text-secondary-foreground mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-primary">{stats.activeMembers}</div>
-                  <div className="text-sm text-muted-foreground">Active Members</div>
-                </CardContent>
-              </Card>
-              
-              <Card className="card-elegant">
-                <CardContent className="p-6 text-center">
-                  <Mail className="w-8 h-8 text-primary mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-primary">{stats.inactiveMembers}</div>
-                  <div className="text-sm text-muted-foreground">Inactive Members</div>
-                </CardContent>
-              </Card>
-              
-              <Card className="card-elegant">
-                <CardContent className="p-6 text-center">
-                  <Settings className="w-8 h-8 text-secondary-foreground mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-primary">{stats.events}</div>
-                  <div className="text-sm text-muted-foreground">Events</div>
-                </CardContent>
-              </Card>
-            </div>
 
             {/* Admin Features */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

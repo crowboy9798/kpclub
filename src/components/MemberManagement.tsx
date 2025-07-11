@@ -654,10 +654,10 @@ const MemberManagement = () => {
               <DialogTrigger asChild>
                 <Button variant="outline" className="whitespace-nowrap">
                   <Plus className="w-4 h-4 mr-2" />
-                  Add Group
+                  ADD NEW GROUP
                 </Button>
               </DialogTrigger>
-              <DialogContent>
+              <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                   <DialogTitle>Add New Group</DialogTitle>
                 </DialogHeader>
@@ -669,6 +669,7 @@ const MemberManagement = () => {
                       value={newGroupName}
                       onChange={(e) => setNewGroupName(e.target.value)}
                       placeholder="Enter group name"
+                      className="mt-1"
                     />
                   </div>
                   <div className="flex justify-end gap-2">
