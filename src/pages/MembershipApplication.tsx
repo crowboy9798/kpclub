@@ -189,20 +189,20 @@ const MembershipApplication = () => {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="surname">Surname *</Label>
-                    <Input
-                      id="surname"
-                      value={formData.surname}
-                      onChange={(e) => handleInputChange('surname', e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div>
                     <Label htmlFor="givenNames">Given Names *</Label>
                     <Input
                       id="givenNames"
                       value={formData.givenNames}
                       onChange={(e) => handleInputChange('givenNames', e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="surname">Surname *</Label>
+                    <Input
+                      id="surname"
+                      value={formData.surname}
+                      onChange={(e) => handleInputChange('surname', e.target.value)}
                       required
                     />
                   </div>
