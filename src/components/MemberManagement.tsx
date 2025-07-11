@@ -796,14 +796,6 @@ const MemberManagement = () => {
             Export CSV
           </Button>
 
-          <Dialog open={isEmailDialogOpen} onOpenChange={setIsEmailDialogOpen}>
-            <DialogTrigger asChild>
-              <Button variant="default" disabled={selectedMembers.size === 0}>
-                <Mail className="w-4 h-4 mr-2" />
-                Email ({selectedMembers.size})
-              </Button>
-            </DialogTrigger>
-          </Dialog>
         </div>
       </div>
 
