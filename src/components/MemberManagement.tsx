@@ -23,7 +23,11 @@ const MemberManagement = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isAddGroupDialogOpen, setIsAddGroupDialogOpen] = useState(false);
   const [newGroupName, setNewGroupName] = useState('');
-  const [availableGroups, setAvailableGroups] = useState<string[]>(['2024', '2025', 'Committee', 'LTL']);
+  const [availableGroups, setAvailableGroups] = useState<string[]>([]);
+  const [manuallyAddedGroups, setManuallyAddedGroups] = useState<string[]>(() => {
+    const saved = localStorage.getItem('kpc-custom-groups');
+    return saved ? JSON.parse(saved) : [];
+  });
   const [editingMember, setEditingMember] = useState<Member | null>(null);
   const [selectedMembers, setSelectedMembers] = useState<Set<string>>(new Set());
   const [sortConfig, setSortConfig] = useState<{key: 'first_name' | 'last_name' | 'id' | 'member_no', direction: 'asc' | 'desc'} | null>(null);
@@ -59,11 +63,11 @@ const MemberManagement = () => {
       }
     });
     
-    // Merge with base groups and any manually added groups
+    // Merge with base groups, groups found in member data, and manually added groups
     const baseGroups = ['2024', '2025', 'Committee', 'LTL'];
-    const uniqueGroups = Array.from(new Set([...baseGroups, ...allGroups])).sort();
+    const uniqueGroups = Array.from(new Set([...baseGroups, ...allGroups, ...manuallyAddedGroups])).sort();
     setAvailableGroups(uniqueGroups);
-  }, [members]);
+  }, [members, manuallyAddedGroups]);
 
   const fetchMembers = async () => {
     try {
@@ -251,8 +255,9 @@ const MemberManagement = () => {
 
   const handleAddGroup = () => {
     if (newGroupName.trim() && !availableGroups.includes(newGroupName.trim())) {
-      const updatedGroups = [...availableGroups, newGroupName.trim()];
-      setAvailableGroups(updatedGroups);
+      const updatedManualGroups = [...manuallyAddedGroups, newGroupName.trim()];
+      setManuallyAddedGroups(updatedManualGroups);
+      localStorage.setItem('kpc-custom-groups', JSON.stringify(updatedManualGroups));
       setNewGroupName('');
       setIsAddGroupDialogOpen(false);
       toast({
