@@ -29,6 +29,7 @@ const MemberManagement = () => {
   const [sortConfig, setSortConfig] = useState<{key: 'first_name' | 'last_name' | 'id' | 'member_no', direction: 'asc' | 'desc'} | null>(null);
   const [editingGroups, setEditingGroups] = useState<{[key: string]: string}>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const groupsInputRef = useRef<HTMLInputElement>(null);
   
   const [formData, setFormData] = useState<MemberFormData>({
     first_name: '',
@@ -320,6 +321,10 @@ const MemberManagement = () => {
       ...prev,
       [memberId]: currentGroups.join(', ')
     }));
+    // Focus the input after state update
+    setTimeout(() => {
+      groupsInputRef.current?.focus();
+    }, 0);
   };
 
   const startEdit = (member: Member) => {
@@ -829,15 +834,25 @@ const MemberManagement = () => {
                            {editingGroups[member.id] !== undefined ? (
                              <div className="flex gap-2 items-center">
                                <Input
+                                 ref={groupsInputRef}
                                  value={editingGroups[member.id]}
                                  onChange={(e) => handleGroupsEdit(member.id, e.target.value)}
-                                 placeholder="Enter groups separated by commas"
-                                 className="text-sm"
+                                 placeholder="Enter groups separated by commas (e.g., 2024, Committee)"
+                                 className="text-sm min-w-[200px]"
+                                 autoFocus
+                                 onKeyDown={(e) => {
+                                   if (e.key === 'Enter') {
+                                     handleGroupsSave(member.id);
+                                   } else if (e.key === 'Escape') {
+                                     handleGroupsCancel(member.id);
+                                   }
+                                 }}
                                />
                                <Button
                                  size="sm"
                                  variant="outline"
                                  onClick={() => handleGroupsSave(member.id)}
+                                 className="whitespace-nowrap"
                                >
                                  Save
                                </Button>
@@ -845,15 +860,16 @@ const MemberManagement = () => {
                                  size="sm"
                                  variant="ghost"
                                  onClick={() => handleGroupsCancel(member.id)}
+                                 className="whitespace-nowrap"
                                >
                                  Cancel
                                </Button>
                              </div>
                            ) : (
                              <div 
-                               className="cursor-pointer hover:bg-muted/50 p-1 rounded min-h-[24px] flex items-center"
+                               className="cursor-pointer hover:bg-muted/50 p-2 rounded min-h-[32px] flex items-center border border-transparent hover:border-border transition-colors"
                                onClick={() => startGroupsEdit(member.id, member.member_groups || [])}
-                               title="Click to edit groups"
+                               title="Click to edit groups - add new groups separated by commas"
                              >
                                {member.member_groups?.length ? (
                                  <div className="flex flex-wrap gap-1">
@@ -864,7 +880,7 @@ const MemberManagement = () => {
                                    ))}
                                  </div>
                                ) : (
-                                 <span className="text-muted-foreground">Click to add groups</span>
+                                 <span className="text-muted-foreground italic">Click to add groups</span>
                                )}
                              </div>
                            )}
