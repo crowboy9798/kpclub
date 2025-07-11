@@ -102,7 +102,7 @@ const Admin = () => {
       icon: Users,
       title: "Member Management",
       description: "Manage member database and profiles",
-      actions: ["View Member List", "Add New Members", "Update Member Info", "Manage Renewals"]
+      actions: ["View Member List", "Add New Members", "Update Member Info", "ADD NEW GROUP"]
     },
     {
       icon: Mail,

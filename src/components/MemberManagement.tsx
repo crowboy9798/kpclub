@@ -19,8 +19,11 @@ const MemberManagement = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterYear, setFilterYear] = useState<'all' | '2024' | '2025'>('all');
-  const [filterGroup, setFilterGroup] = useState<'all' | '2024' | '2025' | 'Committee' | 'LTL'>('all');
+  const [filterGroup, setFilterGroup] = useState<string>('all');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isAddGroupDialogOpen, setIsAddGroupDialogOpen] = useState(false);
+  const [newGroupName, setNewGroupName] = useState('');
+  const [availableGroups, setAvailableGroups] = useState<string[]>(['2024', '2025', 'Committee', 'LTL']);
   const [editingMember, setEditingMember] = useState<Member | null>(null);
   const [selectedMembers, setSelectedMembers] = useState<Set<string>>(new Set());
   const [sortConfig, setSortConfig] = useState<{key: 'first_name' | 'last_name' | 'id' | 'member_no', direction: 'asc' | 'desc'} | null>(null);
@@ -227,6 +230,25 @@ const MemberManagement = () => {
       nok_contact: '',
       member_no: ''
     });
+  };
+
+  const handleAddGroup = () => {
+    if (newGroupName.trim() && !availableGroups.includes(newGroupName.trim())) {
+      const updatedGroups = [...availableGroups, newGroupName.trim()];
+      setAvailableGroups(updatedGroups);
+      setNewGroupName('');
+      setIsAddGroupDialogOpen(false);
+      toast({
+        title: "Group Added",
+        description: `Group "${newGroupName.trim()}" has been added successfully.`
+      });
+    } else if (availableGroups.includes(newGroupName.trim())) {
+      toast({
+        title: "Group Already Exists",
+        description: `Group "${newGroupName.trim()}" already exists.`,
+        variant: "destructive"
+      });
+    }
   };
 
   const startEdit = (member: Member) => {
@@ -615,23 +637,57 @@ const MemberManagement = () => {
             </div>
             
             <div className="w-full sm:w-48">
-              <Select value={filterGroup} onValueChange={(value: 'all' | '2024' | '2025' | 'Committee' | 'LTL') => setFilterGroup(value)}>
+              <Select value={filterGroup} onValueChange={(value: any) => setFilterGroup(value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Filter by group" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Groups</SelectItem>
-                  <SelectItem value="2024">2024</SelectItem>
-                  <SelectItem value="2025">2025</SelectItem>
-                  <SelectItem value="Committee">Committee</SelectItem>
-                  <SelectItem value="LTL">LTL</SelectItem>
+                  {availableGroups.map(group => (
+                    <SelectItem key={group} value={group}>{group}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
             
-            <Button variant="outline" className="whitespace-nowrap">
-              Go
-            </Button>
+            <Dialog open={isAddGroupDialogOpen} onOpenChange={setIsAddGroupDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="whitespace-nowrap">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Group
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Add New Group</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="groupName">Group Name</Label>
+                    <Input
+                      id="groupName"
+                      value={newGroupName}
+                      onChange={(e) => setNewGroupName(e.target.value)}
+                      placeholder="Enter group name"
+                    />
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setIsAddGroupDialogOpen(false);
+                        setNewGroupName('');
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                    <Button onClick={handleAddGroup}>
+                      Add Group
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         </CardContent>
       </Card>
