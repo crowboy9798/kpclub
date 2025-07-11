@@ -50,6 +50,21 @@ const MemberManagement = () => {
     fetchMembers();
   }, []);
 
+  // Update available groups when members change
+  useEffect(() => {
+    const allGroups = new Set<string>();
+    members.forEach(member => {
+      if (member.member_groups) {
+        member.member_groups.forEach(group => allGroups.add(group));
+      }
+    });
+    
+    // Merge with base groups and any manually added groups
+    const baseGroups = ['2024', '2025', 'Committee', 'LTL'];
+    const uniqueGroups = Array.from(new Set([...baseGroups, ...allGroups])).sort();
+    setAvailableGroups(uniqueGroups);
+  }, [members]);
+
   const fetchMembers = async () => {
     try {
       setLoading(true);
