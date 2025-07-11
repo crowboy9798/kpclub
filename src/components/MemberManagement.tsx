@@ -50,6 +50,19 @@ const MemberManagement = () => {
     fetchMembers();
   }, []);
 
+  // Update available groups when members change
+  useEffect(() => {
+    const allGroups = new Set(['2024', '2025', 'Committee', 'LTL']);
+    members.forEach(member => {
+      member.member_groups?.forEach(group => {
+        if (group.trim()) {
+          allGroups.add(group.trim());
+        }
+      });
+    });
+    setAvailableGroups(Array.from(allGroups).sort());
+  }, [members]);
+
   const fetchMembers = async () => {
     try {
       setLoading(true);
@@ -693,6 +706,15 @@ const MemberManagement = () => {
             <Download className="w-4 h-4 mr-2" />
             Export CSV
           </Button>
+          
+          <Dialog open={isAddGroupDialogOpen} onOpenChange={setIsAddGroupDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline">
+                <Plus className="w-4 h-4 mr-2" />
+                Add New Group
+              </Button>
+            </DialogTrigger>
+          </Dialog>
         </div>
       </div>
 
@@ -1063,6 +1085,41 @@ const MemberManagement = () => {
               </Button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Group Dialog */}
+      <Dialog open={isAddGroupDialogOpen} onOpenChange={setIsAddGroupDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add New Group</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="groupName">Group Name</Label>
+              <Input
+                id="groupName"
+                value={newGroupName}
+                onChange={(e) => setNewGroupName(e.target.value)}
+                placeholder="Enter group name"
+                className="mt-1"
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsAddGroupDialogOpen(false);
+                  setNewGroupName('');
+                }}
+              >
+                Cancel
+              </Button>
+              <Button onClick={handleAddGroup}>
+                Add Group
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

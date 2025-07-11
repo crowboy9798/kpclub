@@ -18,9 +18,6 @@ const Admin = () => {
     password: ''
   });
   const [activeTab, setActiveTab] = useState<'dashboard' | 'members' | 'events'>('dashboard');
-  const [isAddGroupDialogOpen, setIsAddGroupDialogOpen] = useState(false);
-  const [newGroupName, setNewGroupName] = useState('');
-  const [availableGroups, setAvailableGroups] = useState<string[]>(['2024', '2025', 'Committee', 'LTL']);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,24 +45,6 @@ const Admin = () => {
     });
   };
 
-  const handleAddGroup = () => {
-    if (newGroupName.trim() && !availableGroups.includes(newGroupName.trim())) {
-      const updatedGroups = [...availableGroups, newGroupName.trim()];
-      setAvailableGroups(updatedGroups);
-      setNewGroupName('');
-      setIsAddGroupDialogOpen(false);
-      toast({
-        title: "Group Added",
-        description: `Group "${newGroupName.trim()}" has been added successfully.`
-      });
-    } else if (availableGroups.includes(newGroupName.trim())) {
-      toast({
-        title: "Group Already Exists",
-        description: `Group "${newGroupName.trim()}" already exists.`,
-        variant: "destructive"
-      });
-    }
-  };
 
 
   const adminFeatures = [
@@ -79,7 +58,7 @@ const Admin = () => {
       icon: Users,
       title: "Member Management",
       description: "Manage member database and profiles",
-      actions: ["View Member List", "Add New Members", "Update Member Info", "ADD NEW GROUP"]
+      actions: ["View Member List", "Add New Members", "Update Member Info"]
     },
     {
       icon: Mail,
@@ -226,11 +205,7 @@ const Admin = () => {
                             className="w-full justify-start text-left"
                             onClick={() => {
                               if (feature.title === "Member Management") {
-                                if (action === "ADD NEW GROUP") {
-                                  setIsAddGroupDialogOpen(true);
-                                } else {
-                                  setActiveTab('members');
-                                }
+                                setActiveTab('members');
                               } else if (feature.title === "Event Management") {
                                 setActiveTab('events');
                               } else {
@@ -257,40 +232,6 @@ const Admin = () => {
           <EventManagement />
         )}
 
-        {/* Add Group Dialog */}
-        <Dialog open={isAddGroupDialogOpen} onOpenChange={setIsAddGroupDialogOpen}>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>Add New Group</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="groupName">Group Name</Label>
-                <Input
-                  id="groupName"
-                  value={newGroupName}
-                  onChange={(e) => setNewGroupName(e.target.value)}
-                  placeholder="Enter group name"
-                  className="mt-1"
-                />
-              </div>
-              <div className="flex justify-end gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setIsAddGroupDialogOpen(false);
-                    setNewGroupName('');
-                  }}
-                >
-                  Cancel
-                </Button>
-                <Button onClick={handleAddGroup}>
-                  Add Group
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
 
       </div>
     </div>
