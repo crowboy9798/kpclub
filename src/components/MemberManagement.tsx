@@ -8,9 +8,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Member, MemberFormData } from '@/types/member';
-import { Users, Plus, Upload, Download, Search, Edit, Trash2, ChevronUp, ChevronDown } from 'lucide-react';
+import { Users, Plus, Upload, Download, Search, Edit, Trash2, ChevronUp, ChevronDown, Mail } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 const MemberManagement = () => {
@@ -32,6 +33,14 @@ const MemberManagement = () => {
   const [selectedMembers, setSelectedMembers] = useState<Set<string>>(new Set());
   const [sortConfig, setSortConfig] = useState<{key: 'first_name' | 'last_name' | 'id' | 'member_no', direction: 'asc' | 'desc'} | null>(null);
   const [editingGroups, setEditingGroups] = useState<{[key: string]: string}>({});
+  const [isEmailDialogOpen, setIsEmailDialogOpen] = useState(false);
+  const [emailForm, setEmailForm] = useState({
+    subject: '',
+    message: '',
+    fromEmail: 'onboarding@resend.dev',
+    fromName: 'KPC Member Management'
+  });
+  const [sendingEmails, setSendingEmails] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const groupsInputRef = useRef<HTMLInputElement>(null);
   
@@ -672,6 +681,79 @@ const MemberManagement = () => {
     setSelectedMembers(new Set());
   };
 
+  const handleSendEmail = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (selectedMembers.size === 0) {
+      toast({
+        title: "No Recipients Selected",
+        description: "Please select members to send emails to.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const recipients = filteredAndSortedMembers
+      .filter(member => selectedMembers.has(member.id))
+      .map(member => ({
+        email: member.email,
+        first_name: member.first_name,
+        last_name: member.last_name
+      }))
+      .filter(recipient => recipient.email); // Only include members with email addresses
+
+    if (recipients.length === 0) {
+      toast({
+        title: "No Email Addresses",
+        description: "None of the selected members have email addresses.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setSendingEmails(true);
+    console.log(`Sending emails to ${recipients.length} recipients`);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('send-bulk-email', {
+        body: {
+          recipients,
+          subject: emailForm.subject,
+          message: emailForm.message,
+          fromEmail: emailForm.fromEmail,
+          fromName: emailForm.fromName
+        }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Emails Sent",
+        description: data.message || `Successfully sent emails to ${recipients.length} members.`
+      });
+
+      setIsEmailDialogOpen(false);
+      setEmailForm({
+        subject: '',
+        message: '',
+        fromEmail: 'onboarding@resend.dev',
+        fromName: 'KPC Member Management'
+      });
+      clearSelection();
+    } catch (error: any) {
+      console.error('Error sending emails:', error);
+      toast({
+        title: "Email Error",
+        description: error.message || "Failed to send emails. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setSendingEmails(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -713,8 +795,45 @@ const MemberManagement = () => {
             <Download className="w-4 h-4 mr-2" />
             Export CSV
           </Button>
+
+          {selectedMembers.size > 0 && (
+            <Dialog open={isEmailDialogOpen} onOpenChange={setIsEmailDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="default">
+                  <Mail className="w-4 h-4 mr-2" />
+                  Email ({selectedMembers.size})
+                </Button>
+              </DialogTrigger>
+            </Dialog>
+          )}
         </div>
       </div>
+
+      {/* Selection Actions */}
+      {selectedMembers.size > 0 && (
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">
+                {selectedMembers.size} member{selectedMembers.size !== 1 ? 's' : ''} selected
+              </span>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={clearSelection}>
+                  Clear Selection
+                </Button>
+                <Dialog open={isEmailDialogOpen} onOpenChange={setIsEmailDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button size="sm">
+                      <Mail className="w-4 h-4 mr-2" />
+                      Send Email
+                    </Button>
+                  </DialogTrigger>
+                </Dialog>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Filters */}
       <Card>
@@ -1080,6 +1199,93 @@ const MemberManagement = () => {
               </Button>
               <Button type="submit">
                 {editingMember ? 'Update Member' : 'Add Member'}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Email Dialog */}
+      <Dialog open={isEmailDialogOpen} onOpenChange={setIsEmailDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Send Email to Selected Members</DialogTitle>
+          </DialogHeader>
+          
+          <form onSubmit={handleSendEmail} className="space-y-4">
+            <div>
+              <Label htmlFor="recipients">Recipients</Label>
+              <div className="text-sm text-muted-foreground mt-1">
+                {selectedMembers.size} member{selectedMembers.size !== 1 ? 's' : ''} selected
+                {selectedMembers.size > 0 && (
+                  <span className="ml-2">
+                    ({filteredAndSortedMembers
+                      .filter(member => selectedMembers.has(member.id) && member.email)
+                      .length} with email addresses)
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="fromName">From Name</Label>
+                <Input
+                  id="fromName"
+                  value={emailForm.fromName}
+                  onChange={(e) => setEmailForm({ ...emailForm, fromName: e.target.value })}
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="fromEmail">From Email</Label>
+                <Input
+                  id="fromEmail"
+                  type="email"
+                  value={emailForm.fromEmail}
+                  onChange={(e) => setEmailForm({ ...emailForm, fromEmail: e.target.value })}
+                  required
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="subject">Subject</Label>
+              <Input
+                id="subject"
+                value={emailForm.subject}
+                onChange={(e) => setEmailForm({ ...emailForm, subject: e.target.value })}
+                placeholder="Email subject"
+                required
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="message">Message</Label>
+              <Textarea
+                id="message"
+                value={emailForm.message}
+                onChange={(e) => setEmailForm({ ...emailForm, message: e.target.value })}
+                placeholder="Enter your message here... You can use {first_name}, {last_name}, or {full_name} for personalization."
+                rows={6}
+                required
+              />
+              <div className="text-xs text-muted-foreground mt-1">
+                Tip: Use {"{first_name}"}, {"{last_name}"}, or {"{full_name}"} to personalize emails
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsEmailDialogOpen(false)}
+                disabled={sendingEmails}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={sendingEmails || selectedMembers.size === 0}>
+                {sendingEmails ? 'Sending...' : `Send Email (${selectedMembers.size})`}
               </Button>
             </div>
           </form>
