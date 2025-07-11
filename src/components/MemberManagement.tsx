@@ -19,6 +19,7 @@ const MemberManagement = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterYear, setFilterYear] = useState<'all' | '2024' | '2025'>('all');
+  const [filterGroup, setFilterGroup] = useState<'all' | '2024' | '2025' | 'Committee' | 'LTL'>('all');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<Member | null>(null);
   const [selectedMembers, setSelectedMembers] = useState<Set<string>>(new Set());
@@ -290,7 +291,11 @@ const MemberManagement = () => {
         (filterYear === '2024' && member.member_groups?.includes('2024')) ||
         (filterYear === '2025' && member.member_groups?.includes('2025'));
       
-      return matchesSearch && matchesYear;
+      const matchesGroup = 
+        filterGroup === 'all' ||
+        member.member_groups?.includes(filterGroup);
+      
+      return matchesSearch && matchesYear && matchesGroup;
     });
     
     console.log('Filtered results:', filtered.length);
@@ -326,7 +331,7 @@ const MemberManagement = () => {
     }
 
     return filtered;
-  }, [members, searchTerm, filterYear, sortConfig]);
+  }, [members, searchTerm, filterYear, filterGroup, sortConfig]);
 
   const handleImportCSV = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -607,6 +612,21 @@ const MemberManagement = () => {
                   className="pl-10"
                 />
               </div>
+            </div>
+            
+            <div className="w-full sm:w-48">
+              <Select value={filterGroup} onValueChange={(value: 'all' | '2024' | '2025' | 'Committee' | 'LTL') => setFilterGroup(value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Filter by group" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Groups</SelectItem>
+                  <SelectItem value="2024">2024</SelectItem>
+                  <SelectItem value="2025">2025</SelectItem>
+                  <SelectItem value="Committee">Committee</SelectItem>
+                  <SelectItem value="LTL">LTL</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             
             <Button variant="outline" className="whitespace-nowrap">
