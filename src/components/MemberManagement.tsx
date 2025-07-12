@@ -37,7 +37,7 @@ const MemberManagement = () => {
   const [emailForm, setEmailForm] = useState({
     subject: '',
     message: '',
-    fromEmail: 'kensingtonprobusclub@gmail.com',
+    fromEmail: 'onboarding@resend.dev',
     fromName: 'Kensington Probus Club'
   });
   const [sendingEmails, setSendingEmails] = useState(false);
@@ -738,7 +738,7 @@ const MemberManagement = () => {
       setEmailForm({
         subject: '',
         message: '',
-        fromEmail: 'kensingtonprobusclub@gmail.com',
+        fromEmail: 'onboarding@resend.dev',
         fromName: 'Kensington Probus Club'
       });
       clearSelection();
