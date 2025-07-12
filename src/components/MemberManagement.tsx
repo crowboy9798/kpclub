@@ -37,8 +37,8 @@ const MemberManagement = () => {
   const [emailForm, setEmailForm] = useState({
     subject: '',
     message: '',
-    fromEmail: 'onboarding@resend.dev',
-    fromName: 'KPC Member Management'
+    fromEmail: 'kensingtonprobusclub@gmail.com',
+    fromName: 'Kensington Probus Club'
   });
   const [sendingEmails, setSendingEmails] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -738,8 +738,8 @@ const MemberManagement = () => {
       setEmailForm({
         subject: '',
         message: '',
-        fromEmail: 'onboarding@resend.dev',
-        fromName: 'KPC Member Management'
+        fromEmail: 'kensingtonprobusclub@gmail.com',
+        fromName: 'Kensington Probus Club'
       });
       clearSelection();
     } catch (error: any) {
