@@ -112,7 +112,7 @@ const MembershipApplication = () => {
         await supabase.functions.invoke('send-membership-email', {
           body: {
             ...formData,
-            adminEmail: 'admin@kensingtonprobusclub.org' // Change this to your admin email
+            adminEmail: 'kensingtonprobusclub@gmail.com'
           }
         });
       } catch (emailError) {
