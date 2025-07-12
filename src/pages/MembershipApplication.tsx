@@ -107,6 +107,19 @@ const MembershipApplication = () => {
         throw error;
       }
 
+      // Send email notification
+      try {
+        await supabase.functions.invoke('send-membership-email', {
+          body: {
+            ...formData,
+            adminEmail: 'admin@kensingtonprobusclub.org' // Change this to your admin email
+          }
+        });
+      } catch (emailError) {
+        console.error('Email notification failed:', emailError);
+        // Continue with success message even if email fails
+      }
+
       toast({
         title: "Application Submitted",
         description: "Thank you! Your membership application has been received and you've been added to our database.",
