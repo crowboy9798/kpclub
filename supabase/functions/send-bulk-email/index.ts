@@ -63,6 +63,10 @@ const handler = async (req: Request): Promise<Response> => {
         return { success: true, id: emailResponse.data?.id };
       } catch (error) {
         console.error(`Error sending email to ${recipient.email}:`, error);
+        // Handle Resend validation errors specifically
+        if (error.message && error.message.includes('testing emails')) {
+          return { success: false, error: 'Email restricted - Resend free tier only allows verified addresses' };
+        }
         return { success: false, error: error.message };
       }
     });
