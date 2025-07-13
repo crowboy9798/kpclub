@@ -156,9 +156,11 @@ const MembershipApplication = () => {
         digitalSignatureName: ''
       });
     } catch (error) {
+      console.error('Application submission error:', error);
       toast({
-        title: "Application Submitted",
-        description: "Thank you! We'll review your application and contact you soon.",
+        title: "Submission Failed",
+        description: `There was an error submitting your application: ${error.message}`,
+        variant: "destructive"
       });
     }
   };
