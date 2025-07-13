@@ -89,14 +89,12 @@ const MembershipApplication = () => {
         Address: formData.address || null,
         Suburb: formData.suburb || null,
         Pcode: formData.postcode || null,
-        Member_2025: 'YES',
-        Member_2024: 'NO',
         Member_No: `KPC${String(Date.now()).slice(-6)}`,
         Joined: new Date().toISOString().split('T')[0],
         DOB: formData.dateOfBirth || null,
-        NOK: formData.emergencyContactName || null,
         NOK_NAME: formData.emergencyContactName || null,
-        NOK_Contact: formData.emergencyContactPhone || null
+        NOK_Contact: formData.emergencyContactPhone || null,
+        NOK_relationship: formData.emergencyContactRelationship || null
       };
 
       const { error } = await supabase
