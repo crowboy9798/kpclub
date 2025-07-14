@@ -807,31 +807,6 @@ const MemberManagement = ({ isReadOnly = false }: MemberManagementProps) => {
         </div>
       </div>
 
-      {/* Selection Actions */}
-      {selectedMembers.size > 0 && (
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">
-                {selectedMembers.size} member{selectedMembers.size !== 1 ? 's' : ''} selected
-              </span>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={clearSelection}>
-                  Clear Selection
-                </Button>
-                <Dialog open={isEmailDialogOpen} onOpenChange={setIsEmailDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button size="sm">
-                      <Mail className="w-4 h-4 mr-2" />
-                      Send Email
-                    </Button>
-                  </DialogTrigger>
-                </Dialog>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Filters */}
       <Card>
@@ -866,6 +841,33 @@ const MemberManagement = ({ isReadOnly = false }: MemberManagementProps) => {
               </Select>
             </div>
             
+            {/* Selection Actions - Always Visible */}
+            <div className="flex items-center gap-3 px-4 py-2 bg-muted/20 rounded-md border min-w-fit">
+              <span className="text-sm text-muted-foreground whitespace-nowrap">
+                {selectedMembers.size || 0} member{selectedMembers.size !== 1 ? 's' : ''} selected
+              </span>
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={clearSelection}
+                  disabled={selectedMembers.size === 0}
+                >
+                  Clear Selection
+                </Button>
+                <Dialog open={isEmailDialogOpen} onOpenChange={setIsEmailDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button 
+                      size="sm"
+                      disabled={selectedMembers.size === 0}
+                    >
+                      <Mail className="w-4 h-4 mr-2" />
+                      Send Email
+                    </Button>
+                  </DialogTrigger>
+                </Dialog>
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>
