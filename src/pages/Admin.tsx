@@ -13,8 +13,9 @@ import EventManagement from '@/components/EventManagement';
 const Admin = () => {
   const { toast } = useToast();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userPermissions, setUserPermissions] = useState<'admin' | 'committee' | null>(null);
   const [loginData, setLoginData] = useState({
-    username: '',
+    email: '',
     password: ''
   });
   const [activeTab, setActiveTab] = useState<'dashboard' | 'members' | 'events'>('dashboard');
@@ -22,20 +23,67 @@ const Admin = () => {
   const [newGroupName, setNewGroupName] = useState('');
   const [availableGroups, setAvailableGroups] = useState<string[]>(['2024', '2025', 'Committee', 'LTL']);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Simple demo authentication - in a real app, this would be handled by a proper auth system
-    if (loginData.username === 'admin' && loginData.password === 'password') {
-      setIsLoggedIn(true);
-      toast({
-        title: "Login Successful",
-        description: "Welcome to the admin dashboard!",
-      });
-    } else {
+    // Check password
+    if (loginData.password !== 'KPC2512#') {
       toast({
         title: "Login Failed",
-        description: "Invalid username or password. Try admin/password for demo.",
+        description: "Invalid password.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Check for admin access
+    if (loginData.email === 'kensingtonprobusclub@gmail.com') {
+      setIsLoggedIn(true);
+      setUserPermissions('admin');
+      toast({
+        title: "Login Successful",
+        description: "Welcome Administrator!",
+      });
+      return;
+    }
+
+    // Check for committee member access
+    try {
+      const { data: members, error } = await supabase
+        .from('KPC2')
+        .select('Email, "Member_groups:"')
+        .eq('Email', loginData.email);
+
+      if (error) {
+        console.error('Error checking member status:', error);
+        toast({
+          title: "Login Error",
+          description: "Unable to verify membership status.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      const member = members?.[0];
+      if (member && member["Member_groups:"] && member["Member_groups:"].includes('Committee')) {
+        setIsLoggedIn(true);
+        setUserPermissions('committee');
+        toast({
+          title: "Login Successful",
+          description: "Welcome Committee Member!",
+        });
+      } else {
+        toast({
+          title: "Access Denied",
+          description: "You don't have permission to access the admin area.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      toast({
+        title: "Login Error",
+        description: "An error occurred during login.",
         variant: "destructive"
       });
     }
@@ -47,6 +95,9 @@ const Admin = () => {
       [e.target.name]: e.target.value
     });
   };
+
+  const isAdmin = userPermissions === 'admin';
+  const isCommittee = userPermissions === 'committee';
 
   const handleAddGroup = () => {
     if (newGroupName.trim() && !availableGroups.includes(newGroupName.trim())) {
@@ -112,16 +163,16 @@ const Admin = () => {
             <CardContent>
               <form onSubmit={handleLogin} className="space-y-4">
                 <div>
-                  <Label htmlFor="username">Username</Label>
+                  <Label htmlFor="email">Email Address</Label>
                   <Input
-                    id="username"
-                    name="username"
-                    type="text"
-                    value={loginData.username}
+                    id="email"
+                    name="email"
+                    type="email"
+                    value={loginData.email}
                     onChange={handleInputChange}
                     required
                     className="mt-1"
-                    placeholder="Enter your username"
+                    placeholder="Enter your email address"
                   />
                 </div>
                 
@@ -166,7 +217,7 @@ const Admin = () => {
           <div>
             <h1 className="section-title mb-2">Admin Dashboard</h1>
             <p className="text-muted-foreground">
-              Welcome back! Manage your club's information and activities.
+              Welcome back{isAdmin ? ' Administrator' : ' Committee Member'}! {isAdmin ? 'Manage' : 'View'} your club's information and activities.
             </p>
           </div>
           <div className="flex gap-2">
@@ -192,7 +243,11 @@ const Admin = () => {
             </Button>
             <Button 
               variant="outline" 
-              onClick={() => setIsLoggedIn(false)}
+              onClick={() => {
+                setIsLoggedIn(false);
+                setUserPermissions(null);
+                setLoginData({ email: '', password: '' });
+              }}
             >
               <Lock className="w-4 h-4 mr-2" />
               Logout
@@ -252,9 +307,9 @@ const Admin = () => {
             </div>
           </>
         ) : activeTab === 'members' ? (
-          <MemberManagement />
+          <MemberManagement isReadOnly={!isAdmin} />
         ) : (
-          <EventManagement />
+          <EventManagement isReadOnly={!isAdmin} />
         )}
 
         {/* Add Group Dialog */}

@@ -46,7 +46,11 @@ interface EventFormData {
   detailed_content?: string;
 }
 
-const EventManagement = () => {
+interface EventManagementProps {
+  isReadOnly?: boolean;
+}
+
+const EventManagement = ({ isReadOnly = false }: EventManagementProps) => {
   const { toast } = useToast();
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
@@ -311,16 +315,17 @@ const EventManagement = () => {
   }
 
   return (
-    <div className="space-y-6">
+      <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-semibold text-primary">Event Management</h2>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={resetForm}>
-              <Plus className="w-4 h-4 mr-2" />
-              Add New Event
-            </Button>
-          </DialogTrigger>
+        {!isReadOnly && (
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={resetForm}>
+                <Plus className="w-4 h-4 mr-2" />
+                Add New Event
+              </Button>
+            </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
@@ -514,6 +519,7 @@ const EventManagement = () => {
             </form>
           </DialogContent>
         </Dialog>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -524,24 +530,28 @@ const EventManagement = () => {
                 <span className={`px-3 py-1 rounded-full text-sm font-medium ${getCategoryColor(event.category)}`}>
                   {event.category}
                 </span>
-                <div className="flex items-center space-x-2">
-                  {event.featured && <Star className="w-4 h-4 text-secondary" />}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => openEditDialog(event)}
-                  >
-                    <Edit2 className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDelete(event.id)}
-                    className="text-destructive hover:text-destructive"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
+                  <div className="flex items-center space-x-2">
+                   {event.featured && <Star className="w-4 h-4 text-secondary" />}
+                   {!isReadOnly && (
+                     <>
+                       <Button
+                         variant="ghost"
+                         size="sm"
+                         onClick={() => openEditDialog(event)}
+                       >
+                         <Edit2 className="w-4 h-4" />
+                       </Button>
+                       <Button
+                         variant="ghost"
+                         size="sm"
+                         onClick={() => handleDelete(event.id)}
+                         className="text-destructive hover:text-destructive"
+                       >
+                         <Trash2 className="w-4 h-4" />
+                       </Button>
+                     </>
+                   )}
+                 </div>
               </div>
 
               <h3 className="text-lg font-semibold text-primary mb-2">{event.title}</h3>

@@ -14,7 +14,11 @@ import { Member, MemberFormData } from '@/types/member';
 import { Users, Plus, Upload, Download, Search, Edit, Trash2, ChevronUp, ChevronDown, Mail } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
-const MemberManagement = () => {
+interface MemberManagementProps {
+  isReadOnly?: boolean;
+}
+
+const MemberManagement = ({ isReadOnly = false }: MemberManagementProps) => {
   const { toast } = useToast();
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
@@ -767,29 +771,33 @@ const MemberManagement = () => {
         </div>
         
         <div className="flex gap-2">
-          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="w-4 h-4 mr-2" />
-                Add Member
+          {!isReadOnly && (
+            <>
+              <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Member
+                  </Button>
+                </DialogTrigger>
+              </Dialog>
+              
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".csv,.tsv,.txt"
+                onChange={handleImportCSV}
+                style={{ display: 'none' }}
+              />
+              <Button 
+                variant="outline"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <Upload className="w-4 h-4 mr-2" />
+                Import CSV
               </Button>
-            </DialogTrigger>
-          </Dialog>
-          
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".csv,.tsv,.txt"
-            onChange={handleImportCSV}
-            style={{ display: 'none' }}
-          />
-          <Button 
-            variant="outline"
-            onClick={() => fileInputRef.current?.click()}
-          >
-            <Upload className="w-4 h-4 mr-2" />
-            Import CSV
-          </Button>
+            </>
+          )}
           
           <Button variant="outline" onClick={handleExportCSV}>
             <Download className="w-4 h-4 mr-2" />
@@ -1014,24 +1022,26 @@ const MemberManagement = () => {
                              </div>
                            )}
                          </TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => startEdit(member)}
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDeleteMember(member)}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
+                       {!isReadOnly && (
+                         <TableCell>
+                           <div className="flex gap-2">
+                             <Button
+                               variant="ghost"
+                               size="sm"
+                               onClick={() => startEdit(member)}
+                             >
+                               <Edit className="w-4 h-4" />
+                             </Button>
+                             <Button
+                               variant="ghost"
+                               size="sm"
+                               onClick={() => handleDeleteMember(member)}
+                             >
+                               <Trash2 className="w-4 h-4" />
+                             </Button>
+                           </div>
+                         </TableCell>
+                       )}
                     </TableRow>
                   );
                 })}
@@ -1042,7 +1052,8 @@ const MemberManagement = () => {
       </Card>
 
       {/* Add/Edit Member Dialog */}
-      <Dialog open={isAddDialogOpen || editingMember !== null} onOpenChange={(open) => {
+      {!isReadOnly && (
+        <Dialog open={isAddDialogOpen || editingMember !== null} onOpenChange={(open) => {
         if (!open) {
           setIsAddDialogOpen(false);
           setEditingMember(null);
@@ -1194,6 +1205,7 @@ const MemberManagement = () => {
           </form>
         </DialogContent>
       </Dialog>
+      )}
 
       {/* Email Dialog */}
       <Dialog open={isEmailDialogOpen} onOpenChange={setIsEmailDialogOpen}>
