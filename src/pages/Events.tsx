@@ -108,10 +108,6 @@ const Events = () => {
                     </div>
                   </div>
                   
-                  <Button variant="outline" className="w-full">
-                    <Users className="w-4 h-4 mr-2" />
-                    Register Interest
-                  </Button>
                 </CardContent>
               </Card>
             ))}
@@ -151,10 +147,6 @@ const Events = () => {
                       )}
                     </div>
                     
-                    <Button variant="ghost" size="sm" className="w-full text-primary hover:bg-primary/10">
-                      Learn More
-                      <ArrowRight className="w-3 h-3 ml-2" />
-                    </Button>
                   </CardContent>
                 </Card>
               ))}
