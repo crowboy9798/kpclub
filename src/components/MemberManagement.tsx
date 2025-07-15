@@ -276,6 +276,22 @@ const MemberManagement = ({ isReadOnly = false }: MemberManagementProps) => {
       const updatedManualGroups = [...manuallyAddedGroups, newGroupName.trim()];
       setManuallyAddedGroups(updatedManualGroups);
       localStorage.setItem('kpc-custom-groups', JSON.stringify(updatedManualGroups));
+      
+      // Immediately update availableGroups to include the new group
+      const allGroups = new Set<string>();
+      members.forEach(member => {
+        if (member['Member_groups:'] && Array.isArray(member['Member_groups:'])) {
+          member['Member_groups:'].forEach(group => {
+            if (group && group.trim()) {
+              allGroups.add(group.trim());
+            }
+          });
+        }
+      });
+      const baseGroups = ['2024', '2025', 'Committee', 'LTL'];
+      const uniqueGroups = Array.from(new Set([...baseGroups, ...updatedManualGroups, ...allGroups])).sort();
+      setAvailableGroups(uniqueGroups);
+      
       setNewGroupName('');
       setIsAddGroupDialogOpen(false);
       toast({
