@@ -272,10 +272,20 @@ const MemberManagement = ({ isReadOnly = false }: MemberManagementProps) => {
   };
 
   const handleAddGroup = () => {
+    console.log('handleAddGroup called with:', newGroupName.trim());
+    console.log('Current availableGroups:', availableGroups);
+    console.log('Current manuallyAddedGroups before update:', manuallyAddedGroups);
+    
     if (newGroupName.trim() && !availableGroups.includes(newGroupName.trim())) {
       const updatedManualGroups = [...manuallyAddedGroups, newGroupName.trim()];
+      console.log('Updated manual groups:', updatedManualGroups);
+      
       setManuallyAddedGroups(updatedManualGroups);
       localStorage.setItem('kpc-custom-groups', JSON.stringify(updatedManualGroups));
+      
+      // Verify localStorage was set
+      const verification = localStorage.getItem('kpc-custom-groups');
+      console.log('localStorage verification:', verification);
       
       // Immediately update availableGroups to include the new group
       const allGroups = new Set<string>();
@@ -290,6 +300,7 @@ const MemberManagement = ({ isReadOnly = false }: MemberManagementProps) => {
       });
       const baseGroups = ['2024', '2025', 'Committee', 'LTL'];
       const uniqueGroups = Array.from(new Set([...baseGroups, ...updatedManualGroups, ...allGroups])).sort();
+      console.log('Updating availableGroups to:', uniqueGroups);
       setAvailableGroups(uniqueGroups);
       
       setNewGroupName('');
