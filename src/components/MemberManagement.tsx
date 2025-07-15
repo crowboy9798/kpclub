@@ -287,21 +287,28 @@ const MemberManagement = ({ isReadOnly = false }: MemberManagementProps) => {
       const verification = localStorage.getItem('kpc-custom-groups');
       console.log('localStorage verification:', verification);
       
-      // Immediately update availableGroups to include the new group
-      const allGroups = new Set<string>();
+      // Force immediate update of availableGroups to ensure dropdown shows the new group
+      const baseGroups = ['2024', '2025', 'Committee', 'LTL'];
+      const memberGroups = new Set<string>();
       members.forEach(member => {
         if (member['Member_groups:'] && Array.isArray(member['Member_groups:'])) {
           member['Member_groups:'].forEach(group => {
             if (group && group.trim()) {
-              allGroups.add(group.trim());
+              memberGroups.add(group.trim());
             }
           });
         }
       });
-      const baseGroups = ['2024', '2025', 'Committee', 'LTL'];
-      const uniqueGroups = Array.from(new Set([...baseGroups, ...updatedManualGroups, ...allGroups])).sort();
-      console.log('Updating availableGroups to:', uniqueGroups);
-      setAvailableGroups(uniqueGroups);
+      
+      // Combine all groups and force immediate state update
+      const allUniqueGroups = Array.from(new Set([
+        ...baseGroups, 
+        ...updatedManualGroups, 
+        ...Array.from(memberGroups)
+      ])).sort();
+      
+      console.log('Forcing availableGroups update to:', allUniqueGroups);
+      setAvailableGroups([...allUniqueGroups]); // Force new array reference
       
       setNewGroupName('');
       setIsAddGroupDialogOpen(false);
