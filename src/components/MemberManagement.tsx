@@ -76,9 +76,9 @@ const MemberManagement = ({ isReadOnly = false }: MemberManagementProps) => {
       }
     });
     
-    // Merge with base groups, groups found in member data, and manually added groups
+    // Always show all base groups and manually added groups, even if they have no members
     const baseGroups = ['2024', '2025', 'Committee', 'LTL'];
-    const uniqueGroups = Array.from(new Set([...baseGroups, ...allGroups, ...manuallyAddedGroups])).sort();
+    const uniqueGroups = Array.from(new Set([...baseGroups, ...manuallyAddedGroups, ...allGroups])).sort();
     setAvailableGroups(uniqueGroups);
   }, [members, manuallyAddedGroups]);
 
