@@ -64,6 +64,7 @@ const MemberManagement = ({ isReadOnly = false }: MemberManagementProps) => {
   });
 
   useEffect(() => {
+    console.log('Manual groups from localStorage:', manuallyAddedGroups);
     fetchMembers();
   }, []);
 
@@ -79,6 +80,10 @@ const MemberManagement = ({ isReadOnly = false }: MemberManagementProps) => {
     // Always show all base groups and manually added groups, even if they have no members
     const baseGroups = ['2024', '2025', 'Committee', 'LTL'];
     const uniqueGroups = Array.from(new Set([...baseGroups, ...manuallyAddedGroups, ...allGroups])).sort();
+    console.log('Available groups updated:', uniqueGroups);
+    console.log('Base groups:', baseGroups);
+    console.log('Manually added groups:', manuallyAddedGroups);
+    console.log('Groups from members:', Array.from(allGroups));
     setAvailableGroups(uniqueGroups);
   }, [members, manuallyAddedGroups]);
 
