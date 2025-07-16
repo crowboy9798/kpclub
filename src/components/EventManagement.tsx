@@ -224,8 +224,13 @@ const EventManagement = ({ isReadOnly = false }: EventManagementProps) => {
       const eventData = {
         title: formData.title,
         description: formData.description || null,
-        date_start: formData.date_start.toISOString().split('T')[0],
-        date_end: formData.date_end?.toISOString().split('T')[0] || null,
+        date_start: formData.date_start.getFullYear() + '-' + 
+          String(formData.date_start.getMonth() + 1).padStart(2, '0') + '-' + 
+          String(formData.date_start.getDate()).padStart(2, '0'),
+        date_end: formData.date_end ? 
+          formData.date_end.getFullYear() + '-' + 
+          String(formData.date_end.getMonth() + 1).padStart(2, '0') + '-' + 
+          String(formData.date_end.getDate()).padStart(2, '0') : null,
         time_start: formData.time_start || null,
         time_end: formData.time_end || null,
         location: formData.location || null,
