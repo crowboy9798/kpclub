@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Mail, Phone, MapPin, Clock, Send, MessageCircle, Calendar } from 'lucide-react';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 const Contact = () => {
   const { toast } = useToast();
@@ -40,6 +41,27 @@ const Contact = () => {
       ...formData,
       [e.target.name]: e.target.value
     });
+  };
+
+  const testEmail = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('test-email');
+      if (error) throw error;
+      
+      toast({
+        title: "Email Test Result",
+        description: data.success ? "Email test successful!" : "Email test failed",
+        variant: data.success ? "default" : "destructive"
+      });
+      console.log("Email test result:", data);
+    } catch (error) {
+      console.error("Email test error:", error);
+      toast({
+        title: "Email Test Failed",
+        description: "Could not test email function",
+        variant: "destructive"
+      });
+    }
   };
 
   const contactInfo = [
@@ -229,10 +251,16 @@ const Contact = () => {
                     </p>
                   </div>
 
-                  <Button type="submit" size="lg" className="w-full">
-                    <Send className="w-4 h-4 mr-2" />
-                    Send Message
-                  </Button>
+                  <div className="space-y-2">
+                    <Button type="submit" size="lg" className="w-full">
+                      <Send className="w-4 h-4 mr-2" />
+                      Send Message
+                    </Button>
+                    
+                    <Button type="button" onClick={testEmail} variant="outline" className="w-full">
+                      Test Email Function
+                    </Button>
+                  </div>
                 </form>
               </CardContent>
             </Card>
