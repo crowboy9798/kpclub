@@ -189,10 +189,10 @@ const Membership = () => {
               </Link>
             </Button>
             <Button size="lg" variant="outline" asChild>
-              <a href="/membership-application">
+              <Link to="/membership-application" onClick={() => window.scrollTo(0, 0)}>
                 <FileText className="w-4 h-4 mr-2" />
                 Apply Online
-              </a>
+              </Link>
             </Button>
           </div>
         </div>
