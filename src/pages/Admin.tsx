@@ -37,7 +37,7 @@ const Admin = () => {
     }
 
     // Check for admin access
-    if (loginData.email === 'kensingtonprobusclub@gmail.com') {
+    if (loginData.email === 'tejifry@gmail.com') {
       setIsLoggedIn(true);
       setUserPermissions('admin');
       toast({
