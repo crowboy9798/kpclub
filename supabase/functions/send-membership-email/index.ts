@@ -142,7 +142,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send email to admin
     const emailResponse = await resend.emails.send({
-      from: "KPC Applications <onboarding@resend.dev>",
+      from: "KPC Applications <admin@kensingtonprobusclub.com.au>",
       to: [applicationData.adminEmail],
       subject: `New Membership Application: ${applicationData.givenNames} ${applicationData.surname}`,
       html: applicationHtml,

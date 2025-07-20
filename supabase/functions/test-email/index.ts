@@ -29,7 +29,7 @@ const handler = async (req: Request): Promise<Response> => {
     
     // Simple test email
     const result = await resend.emails.send({
-      from: "Test <onboarding@resend.dev>",
+      from: "Test <admin@kensingtonprobusclub.com.au>",
       to: ["kensingtonprobusclub@gmail.com"],
       subject: "Test from deployed edge function",
       html: `<p>This is a test email sent from the deployed edge function at ${new Date().toISOString()}</p>`,
