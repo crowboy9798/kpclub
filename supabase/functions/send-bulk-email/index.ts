@@ -19,6 +19,11 @@ interface EmailRequest {
   message: string;
   fromEmail: string;
   fromName: string;
+  attachments?: Array<{
+    filename: string;
+    content: string; // Base64 encoded content
+    contentType: string;
+  }>;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -28,7 +33,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { recipients, subject, message, fromEmail, fromName }: EmailRequest = await req.json();
+    const { recipients, subject, message, fromEmail, fromName, attachments }: EmailRequest = await req.json();
 
     console.log(`Sending emails to ${recipients.length} recipients`);
 
@@ -43,7 +48,7 @@ const handler = async (req: Request): Promise<Response> => {
                                           .replace(/\{last_name\}/g, recipient.last_name)
                                           .replace(/\{full_name\}/g, `${recipient.first_name} ${recipient.last_name}`);
 
-        const emailResponse = await resend.emails.send({
+        const emailPayload: any = {
           from: `${fromName} <admin@kensingtonprobusclub.com.au>`,
           to: [recipient.email],
           subject: subject,
@@ -57,7 +62,17 @@ const handler = async (req: Request): Promise<Response> => {
               </p>
             </div>
           `,
-        });
+        };
+
+        // Add attachments if provided
+        if (attachments && attachments.length > 0) {
+          emailPayload.attachments = attachments.map(attachment => ({
+            filename: attachment.filename,
+            content: attachment.content,
+          }));
+        }
+
+        const emailResponse = await resend.emails.send(emailPayload);
 
         console.log(`Email sent successfully to ${recipient.email}:`, emailResponse);
         return { success: true, id: emailResponse.data?.id };

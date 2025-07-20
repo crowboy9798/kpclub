@@ -42,7 +42,8 @@ const MemberManagement = ({ isReadOnly = false }: MemberManagementProps) => {
     subject: '',
     message: '',
     fromEmail: 'onboarding@resend.dev',
-    fromName: 'Kensington Probus Club'
+    fromName: 'Kensington Probus Club',
+    attachments: [] as Array<{ filename: string; content: string; contentType: string }>
   });
   const [sendingEmails, setSendingEmails] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -724,6 +725,60 @@ const MemberManagement = ({ isReadOnly = false }: MemberManagementProps) => {
     setSelectedMembers(new Set());
   };
 
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files) return;
+
+    const newAttachments: Array<{ filename: string; content: string; contentType: string }> = [];
+
+    for (const file of Array.from(files)) {
+      // Convert file to base64
+      const reader = new FileReader();
+      const base64Promise = new Promise<string>((resolve, reject) => {
+        reader.onload = () => {
+          const result = reader.result as string;
+          // Remove the data URL prefix (e.g., "data:text/plain;base64,")
+          const base64Content = result.split(',')[1];
+          resolve(base64Content);
+        };
+        reader.onerror = reject;
+      });
+
+      reader.readAsDataURL(file);
+
+      try {
+        const base64Content = await base64Promise;
+        newAttachments.push({
+          filename: file.name,
+          content: base64Content,
+          contentType: file.type
+        });
+      } catch (error) {
+        console.error('Error reading file:', error);
+        toast({
+          title: "File Error",
+          description: `Failed to read file: ${file.name}`,
+          variant: "destructive"
+        });
+      }
+    }
+
+    setEmailForm(prev => ({
+      ...prev,
+      attachments: [...prev.attachments, ...newAttachments]
+    }));
+
+    // Reset file input
+    event.target.value = '';
+  };
+
+  const removeAttachment = (index: number) => {
+    setEmailForm(prev => ({
+      ...prev,
+      attachments: prev.attachments.filter((_, i) => i !== index)
+    }));
+  };
+
   const handleSendEmail = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -764,7 +819,8 @@ const MemberManagement = ({ isReadOnly = false }: MemberManagementProps) => {
           subject: emailForm.subject,
           message: emailForm.message,
           fromEmail: emailForm.fromEmail,
-          fromName: emailForm.fromName
+          fromName: emailForm.fromName,
+          attachments: emailForm.attachments.length > 0 ? emailForm.attachments : undefined
         }
       });
 
@@ -782,7 +838,8 @@ const MemberManagement = ({ isReadOnly = false }: MemberManagementProps) => {
         subject: '',
         message: '',
         fromEmail: 'onboarding@resend.dev',
-        fromName: 'Kensington Probus Club'
+        fromName: 'Kensington Probus Club',
+        attachments: []
       });
       clearSelection();
     } catch (error: any) {
@@ -1315,6 +1372,35 @@ const MemberManagement = ({ isReadOnly = false }: MemberManagementProps) => {
               />
               <div className="text-xs text-muted-foreground mt-1">
                 Tip: Use {"{first_name}"}, {"{last_name}"}, or {"{full_name}"} to personalize emails
+              </div>
+            </div>
+
+            <div>
+              <Label>Attachments</Label>
+              <div className="space-y-2">
+                <input
+                  type="file"
+                  multiple
+                  onChange={handleFileUpload}
+                  className="block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
+                />
+                {emailForm.attachments.length > 0 && (
+                  <div className="space-y-1">
+                    {emailForm.attachments.map((attachment, index) => (
+                      <div key={index} className="flex items-center justify-between bg-muted/50 p-2 rounded">
+                        <span className="text-sm">{attachment.filename}</span>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeAttachment(index)}
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
