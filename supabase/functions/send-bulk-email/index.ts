@@ -44,7 +44,7 @@ const handler = async (req: Request): Promise<Response> => {
                                           .replace(/\{full_name\}/g, `${recipient.first_name} ${recipient.last_name}`);
 
         const emailResponse = await resend.emails.send({
-          from: `${fromName} <${fromEmail}>`,
+          from: `${fromName} <admin@kensingtonprobusclub.com.au>`,
           to: [recipient.email],
           subject: subject,
           html: `
