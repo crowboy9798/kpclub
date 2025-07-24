@@ -9,82 +9,124 @@ import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import MemberManagement from '@/components/MemberManagement';
 import EventManagement from '@/components/EventManagement';
+import type { User, Session } from '@supabase/supabase-js';
 
 const Admin = () => {
   const { toast } = useToast();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userPermissions, setUserPermissions] = useState<'admin' | 'committee' | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [loginData, setLoginData] = useState({
     email: '',
     password: ''
   });
+  const [isSignUp, setIsSignUp] = useState(false);
   const [activeTab, setActiveTab] = useState<'dashboard' | 'members' | 'events'>('dashboard');
   const [isAddGroupDialogOpen, setIsAddGroupDialogOpen] = useState(false);
   const [newGroupName, setNewGroupName] = useState('');
   const [availableGroups, setAvailableGroups] = useState<string[]>(['2024', '2025', 'Committee', 'LTL']);
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Check password
-    if (loginData.password !== 'KPC2512#') {
-      toast({
-        title: "Login Failed",
-        description: "Invalid password.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    // Check for admin access
-    if (loginData.email === 'tejifry@gmail.com') {
-      setIsLoggedIn(true);
-      setUserPermissions('admin');
-      toast({
-        title: "Login Successful",
-        description: "Welcome Administrator!",
-      });
-      return;
-    }
-
-    // Check for committee member access
-    try {
-      const { data: members, error } = await supabase
-        .from('KPC2')
-        .select('Email, "Member_groups:"')
-        .eq('Email', loginData.email);
-
-      if (error) {
-        console.error('Error checking member status:', error);
-        toast({
-          title: "Login Error",
-          description: "Unable to verify membership status.",
-          variant: "destructive"
-        });
-        return;
+  // Initialize authentication state
+  useEffect(() => {
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        setIsLoading(false);
       }
+    );
 
-      const member = members?.[0];
-      if (member && member["Member_groups:"] && member["Member_groups:"].includes('Committee')) {
-        setIsLoggedIn(true);
-        setUserPermissions('committee');
-        toast({
-          title: "Login Successful",
-          description: "Welcome Committee Member!",
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setIsLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      if (isSignUp) {
+        // Only allow tejifry@gmail.com to sign up
+        if (loginData.email !== 'tejifry@gmail.com') {
+          toast({
+            title: "Access Denied",
+            description: "Only the administrator email is allowed to create an account.",
+            variant: "destructive"
+          });
+          setIsLoading(false);
+          return;
+        }
+
+        const { error } = await supabase.auth.signUp({
+          email: loginData.email,
+          password: loginData.password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/admin`
+          }
         });
+
+        if (error) {
+          toast({
+            title: "Sign Up Failed",
+            description: error.message,
+            variant: "destructive"
+          });
+        } else {
+          toast({
+            title: "Account Created",
+            description: "Your administrator account has been created successfully!",
+          });
+        }
       } else {
-        toast({
-          title: "Access Denied",
-          description: "You don't have permission to access the admin area.",
-          variant: "destructive"
+        const { error } = await supabase.auth.signInWithPassword({
+          email: loginData.email,
+          password: loginData.password,
         });
+
+        if (error) {
+          toast({
+            title: "Login Failed",
+            description: error.message,
+            variant: "destructive"
+          });
+        } else {
+          toast({
+            title: "Login Successful",
+            description: "Welcome Administrator!",
+          });
+        }
       }
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('Authentication error:', error);
       toast({
-        title: "Login Error",
-        description: "An error occurred during login.",
+        title: "Authentication Error",
+        description: "An error occurred during authentication.",
         variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast({
+        title: "Logout Error",
+        description: error.message,
+        variant: "destructive"
+      });
+    } else {
+      toast({
+        title: "Logged Out",
+        description: "You have been successfully logged out.",
       });
     }
   };
@@ -96,8 +138,8 @@ const Admin = () => {
     });
   };
 
-  const isAdmin = userPermissions === 'admin';
-  const isCommittee = userPermissions === 'committee';
+  // Check if user is admin (only tejifry@gmail.com allowed)
+  const isAdmin = user?.email === 'tejifry@gmail.com';
 
   const handleAddGroup = () => {
     if (newGroupName.trim() && !availableGroups.includes(newGroupName.trim())) {
@@ -146,7 +188,20 @@ const Admin = () => {
     }
   ];
 
-  if (!isLoggedIn) {
+  if (isLoading) {
+    return (
+      <div className="min-h-screen py-8 px-4 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Shield className="w-8 h-8 text-primary animate-pulse" />
+          </div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
     return (
       <div className="min-h-screen py-8 px-4 flex items-center justify-center">
         <div className="max-w-md w-full">
@@ -155,13 +210,15 @@ const Admin = () => {
               <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Shield className="w-8 h-8 text-primary" />
               </div>
-              <CardTitle className="text-2xl text-primary">Admin Login</CardTitle>
+              <CardTitle className="text-2xl text-primary">
+                {isSignUp ? 'Create Admin Account' : 'Admin Login'}
+              </CardTitle>
               <p className="text-muted-foreground">
-                Access the club administration dashboard
+                {isSignUp ? 'Set up your administrator account' : 'Access the club administration dashboard'}
               </p>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleLogin} className="space-y-4">
+              <form onSubmit={handleAuth} className="space-y-4">
                 <div>
                   <Label htmlFor="email">Email Address</Label>
                   <Input
@@ -191,16 +248,20 @@ const Admin = () => {
                 </div>
 
 
-                <Button type="submit" className="w-full" size="lg">
+                <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
                   <Lock className="w-4 h-4 mr-2" />
-                  Sign In
+                  {isLoading ? 'Loading...' : isSignUp ? 'Create Account' : 'Sign In'}
                 </Button>
               </form>
               
               <div className="mt-6 text-center">
-                <p className="text-sm text-muted-foreground">
-                  Forgot your password? Contact the club president for assistance.
-                </p>
+                <Button 
+                  variant="link" 
+                  onClick={() => setIsSignUp(!isSignUp)}
+                  className="text-sm"
+                >
+                  {isSignUp ? 'Already have an account? Sign In' : 'Need to create an admin account? Sign Up'}
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -217,7 +278,7 @@ const Admin = () => {
           <div>
             <h1 className="section-title mb-2">Admin Dashboard</h1>
             <p className="text-muted-foreground">
-              Welcome back{isAdmin ? ' Administrator' : ' Committee Member'}! {isAdmin ? 'Manage' : 'View'} your club's information and activities.
+              Welcome back Administrator! Manage your club's information and activities.
             </p>
           </div>
           <div className="flex gap-2">
@@ -243,11 +304,7 @@ const Admin = () => {
             </Button>
             <Button 
               variant="outline" 
-              onClick={() => {
-                setIsLoggedIn(false);
-                setUserPermissions(null);
-                setLoginData({ email: '', password: '' });
-              }}
+              onClick={handleLogout}
             >
               <Lock className="w-4 h-4 mr-2" />
               Logout
@@ -307,9 +364,9 @@ const Admin = () => {
             </div>
           </>
         ) : activeTab === 'members' ? (
-          <MemberManagement isReadOnly={!isAdmin} />
+          <MemberManagement isReadOnly={false} />
         ) : (
-          <EventManagement isReadOnly={!isAdmin} />
+          <EventManagement isReadOnly={false} />
         )}
 
         {/* Add Group Dialog */}
