@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Shield, Lock, Users, Calendar, Settings, Mail } from 'lucide-react';
+import { Shield, Lock, Users, Calendar, Settings, Mail, Eye, EyeOff } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -21,6 +21,7 @@ const Admin = () => {
     password: ''
   });
   const [isSignUp, setIsSignUp] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [activeTab, setActiveTab] = useState<'dashboard' | 'members' | 'events'>('dashboard');
   const [isAddGroupDialogOpen, setIsAddGroupDialogOpen] = useState(false);
   const [newGroupName, setNewGroupName] = useState('');
@@ -235,16 +236,32 @@ const Admin = () => {
                 
                 <div>
                   <Label htmlFor="password">Password</Label>
-                  <Input
-                    id="password"
-                    name="password"
-                    type="password"
-                    value={loginData.password}
-                    onChange={handleInputChange}
-                    required
-                    className="mt-1"
-                    placeholder="Enter your password"
-                  />
+                  <div className="relative mt-1">
+                    <Input
+                      id="password"
+                      name="password"
+                      type={showPassword ? "text" : "password"}
+                      value={loginData.password}
+                      onChange={handleInputChange}
+                      required
+                      className="pr-10"
+                      placeholder="Enter your password"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                      onClick={() => setShowPassword(!showPassword)}
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4 text-muted-foreground" />
+                      ) : (
+                        <Eye className="h-4 w-4 text-muted-foreground" />
+                      )}
+                    </Button>
+                  </div>
                 </div>
 
 
