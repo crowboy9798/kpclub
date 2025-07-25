@@ -88,26 +88,6 @@ const Contact = () => {
     });
   };
 
-  const testEmail = async () => {
-    try {
-      const { data, error } = await supabase.functions.invoke('test-email');
-      if (error) throw error;
-      
-      toast({
-        title: "Email Test Result",
-        description: data.success ? "Email test successful!" : "Email test failed",
-        variant: data.success ? "default" : "destructive"
-      });
-      console.log("Email test result:", data);
-    } catch (error) {
-      console.error("Email test error:", error);
-      toast({
-        title: "Email Test Failed",
-        description: "Could not test email function",
-        variant: "destructive"
-      });
-    }
-  };
 
   const contactInfo = [
     {
@@ -312,16 +292,10 @@ const Contact = () => {
                     </p>
                   </div>
 
-                  <div className="space-y-2">
-                    <Button type="submit" size="lg" className="w-full">
-                      <Send className="w-4 h-4 mr-2" />
-                      Send Message
-                    </Button>
-                    
-                    <Button type="button" onClick={testEmail} variant="outline" className="w-full">
-                      Test Email Function
-                    </Button>
-                  </div>
+                  <Button type="submit" size="lg" className="w-full">
+                    <Send className="w-4 h-4 mr-2" />
+                    Send Message
+                  </Button>
                 </form>
               </CardContent>
             </Card>
