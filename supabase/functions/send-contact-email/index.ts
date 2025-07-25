@@ -38,7 +38,7 @@ const handler = async (req: Request): Promise<Response> => {
     
     // Send email to the club
     const result = await resend.emails.send({
-      from: "Contact Form <admin@kensingtonprobusclub.com.au>",
+      from: "Contact Form <onboarding@resend.dev>",
       to: ["kensingtonprobusclub@gmail.com"],
       subject: `Contact Form: ${subject}`,
       html: `
@@ -56,7 +56,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send confirmation email to the sender
     await resend.emails.send({
-      from: "Kensington Probus Club <admin@kensingtonprobusclub.com.au>",
+      from: "Kensington Probus Club <onboarding@resend.dev>",
       to: [email],
       subject: "Thank you for contacting us",
       html: `
