@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Mail, Phone, MapPin, Clock, Send, MessageCircle, Calendar } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -18,15 +18,45 @@ const Contact = () => {
     message: ''
   });
 
+  // Captcha state
+  const [captcha, setCaptcha] = useState({ num1: 0, num2: 0, answer: '' });
+  const [captchaInput, setCaptchaInput] = useState('');
+
+  // Generate new captcha
+  const generateCaptcha = () => {
+    const num1 = Math.floor(Math.random() * 10) + 1;
+    const num2 = Math.floor(Math.random() * 10) + 1;
+    setCaptcha({ num1, num2, answer: '' });
+    setCaptchaInput('');
+  };
+
+  // Initialize captcha on component mount
+  useEffect(() => {
+    generateCaptcha();
+  }, []);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate captcha
+    const correctAnswer = captcha.num1 + captcha.num2;
+    if (parseInt(captchaInput) !== correctAnswer) {
+      toast({
+        title: "Captcha Failed",
+        description: "Please solve the math problem correctly.",
+        variant: "destructive"
+      });
+      generateCaptcha(); // Generate new captcha
+      return;
+    }
+
     // In a real application, this would send the form data to a server
     toast({
       title: "Message Sent!",
       description: "Thank you for your message. We'll get back to you soon.",
     });
     
-    // Reset form
+    // Reset form and generate new captcha
     setFormData({
       name: '',
       email: '',
@@ -34,6 +64,7 @@ const Contact = () => {
       subject: '',
       message: ''
     });
+    generateCaptcha();
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -241,6 +272,22 @@ const Contact = () => {
                       rows={6}
                       className="mt-1"
                       placeholder="Tell us more about your inquiry..."
+                    />
+                  </div>
+
+                  {/* Captcha */}
+                  <div className="border border-muted rounded-lg p-4 bg-accent/20">
+                    <Label htmlFor="captcha" className="text-sm font-medium">
+                      Security Check: What is {captcha.num1} + {captcha.num2}? *
+                    </Label>
+                    <Input
+                      id="captcha"
+                      type="number"
+                      value={captchaInput}
+                      onChange={(e) => setCaptchaInput(e.target.value)}
+                      required
+                      className="mt-2 w-32"
+                      placeholder="Answer"
                     />
                   </div>
 
