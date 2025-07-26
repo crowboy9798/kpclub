@@ -55,7 +55,7 @@ const handler = async (req: Request): Promise<Response> => {
                                           .replace(/\{full_name\}/g, `${recipient.first_name} ${recipient.last_name}`);
 
         const emailPayload: any = {
-          from: `${fromName} <kensingtonprobusclub@gmail.com>`,
+          from: `${fromName} <kensingtonprobusclub@kensingtonprobusclub.com.au>`,
           to: [recipient.email],
           subject: subject,
           html: `
