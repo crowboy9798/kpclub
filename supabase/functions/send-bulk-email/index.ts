@@ -37,10 +37,16 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`Sending emails to ${recipients.length} recipients`);
 
-    const emailPromises = recipients.map(async (recipient) => {
+    const results = [];
+    
+    // Send emails sequentially with delay to respect rate limits (2 per second for free tier)
+    for (let i = 0; i < recipients.length; i++) {
+      const recipient = recipients[i];
+      
       if (!recipient.email) {
         console.log(`Skipping recipient ${recipient.first_name} ${recipient.last_name} - no email address`);
-        return { success: false, error: "No email address" };
+        results.push({ success: false, error: "No email address" });
+        continue;
       }
 
       try {
@@ -75,18 +81,22 @@ const handler = async (req: Request): Promise<Response> => {
         const emailResponse = await resend.emails.send(emailPayload);
 
         console.log(`Email sent successfully to ${recipient.email}:`, emailResponse);
-        return { success: true, id: emailResponse.data?.id };
+        results.push({ success: true, id: emailResponse.data?.id });
+        
+        // Add delay between emails to respect rate limits (500ms = 2 per second)
+        if (i < recipients.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, 600));
+        }
       } catch (error) {
         console.error(`Error sending email to ${recipient.email}:`, error);
         // Handle Resend validation errors specifically
         if (error.message && error.message.includes('testing emails')) {
-          return { success: false, error: 'Email restricted - Resend free tier only allows verified addresses' };
+          results.push({ success: false, error: 'Email restricted - Resend free tier only allows verified addresses' });
+        } else {
+          results.push({ success: false, error: error.message });
         }
-        return { success: false, error: error.message };
       }
-    });
-
-    const results = await Promise.all(emailPromises);
+    }
     const successful = results.filter(r => r.success).length;
     const failed = results.filter(r => !r.success).length;
 
