@@ -10,6 +10,7 @@ const Header = () => {
   const navigation = [
     { name: 'Home', href: '/', icon: Home },
     { name: 'Events', href: '/events', icon: Calendar },
+    { name: 'Newsletter', href: '/newsletter', icon: Mail },
     { name: 'New Membership', href: '/membership', icon: Users },
     { name: 'Contact', href: '/contact', icon: Mail },
     { name: 'Admin', href: '/admin', icon: UserCheck },

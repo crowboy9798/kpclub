@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import MemberManagement from '@/components/MemberManagement';
 import EventManagement from '@/components/EventManagement';
+import NewsletterManagement from '@/components/NewsletterManagement';
 import type { User, Session } from '@supabase/supabase-js';
 
 const Admin = () => {
@@ -22,7 +23,7 @@ const Admin = () => {
   });
   const [isSignUp, setIsSignUp] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'members' | 'events'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'members' | 'events' | 'newsletters'>('dashboard');
   const [isAddGroupDialogOpen, setIsAddGroupDialogOpen] = useState(false);
   const [newGroupName, setNewGroupName] = useState('');
   const [availableGroups, setAvailableGroups] = useState<string[]>(['2024', '2025', 'Committee', 'LTL']);
@@ -179,7 +180,7 @@ const Admin = () => {
       icon: Mail,
       title: "Communications",
       description: "Manage newsletters and announcements",
-      actions: ["Send Newsletter"]
+      actions: ["Manage Newsletters", "Send Newsletter"]
     },
     {
       icon: Settings,
@@ -320,6 +321,13 @@ const Admin = () => {
               Events
             </Button>
             <Button 
+              variant={activeTab === 'newsletters' ? 'default' : 'outline'}
+              onClick={() => setActiveTab('newsletters')}
+            >
+              <Mail className="w-4 h-4 mr-2" />
+              Newsletters
+            </Button>
+            <Button 
               variant="outline" 
               onClick={handleLogout}
             >
@@ -362,6 +370,15 @@ const Admin = () => {
                                 }
                               } else if (feature.title === "Event Management") {
                                 setActiveTab('events');
+                              } else if (feature.title === "Communications") {
+                                if (action === "Manage Newsletters") {
+                                  setActiveTab('newsletters');
+                                } else {
+                                  toast({
+                                    title: "Feature Coming Soon",
+                                    description: `${action} functionality will be available in the next update.`
+                                  });
+                                }
                               } else {
                                 toast({
                                   title: "Feature Coming Soon",
@@ -382,8 +399,10 @@ const Admin = () => {
           </>
         ) : activeTab === 'members' ? (
           <MemberManagement isReadOnly={false} />
-        ) : (
+        ) : activeTab === 'events' ? (
           <EventManagement isReadOnly={false} />
+        ) : (
+          <NewsletterManagement />
         )}
 
         {/* Add Group Dialog */}

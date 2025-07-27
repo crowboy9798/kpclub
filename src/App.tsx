@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import Layout from "./components/Layout";
 import Home from "./pages/Home";
 import Events from "./pages/Events";
+import Newsletter from "./pages/Newsletter";
 import Membership from "./pages/Membership";
 import MembershipApplication from "./pages/MembershipApplication";
 import Contact from "./pages/Contact";
@@ -36,6 +37,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/events" element={<Events />} />
+            <Route path="/newsletter" element={<Newsletter />} />
             <Route path="/membership" element={<Membership />} />
             <Route path="/membership-application" element={<MembershipApplication />} />
             <Route path="/contact" element={<Contact />} />
