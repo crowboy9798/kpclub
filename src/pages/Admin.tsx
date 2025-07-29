@@ -213,7 +213,7 @@ const Admin = () => {
                 <Shield className="w-8 h-8 text-primary" />
               </div>
               <CardTitle className="text-2xl text-primary">
-                {isSignUp ? 'Create Admin Account' : 'Admin Login'}
+                {isSignUp ? 'Create Admin Account' : 'Administrator Login'}
               </CardTitle>
               <p className="text-muted-foreground">
                 {isSignUp ? 'Set up your administrator account' : 'Access the club administration dashboard'}
