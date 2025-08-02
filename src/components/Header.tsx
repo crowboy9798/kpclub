@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Users, Calendar, Mail, UserCheck, Home } from 'lucide-react';
+import { Menu, X, Users, Calendar, Mail, UserCheck, Home, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const Header = () => {
@@ -13,6 +13,7 @@ const Header = () => {
     { name: 'Newsletter', href: '/newsletter', icon: Mail },
     { name: 'New Membership', href: '/membership', icon: Users },
     { name: 'Contact', href: '/contact', icon: Mail },
+    { name: 'Admin', href: '/admin', icon: Settings },
   ];
 
   const isActive = (path: string) => location.pathname === path;
