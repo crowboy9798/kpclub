@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Shield, Lock, Users, Calendar, Settings, Mail, Eye, EyeOff } from 'lucide-react';
+import { Shield, Lock, Users, Calendar, Settings, Mail, Eye, EyeOff, Clock } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import MemberManagement from '@/components/MemberManagement';
 import EventManagement from '@/components/EventManagement';
 import NewsletterManagement from '@/components/NewsletterManagement';
+import { UserManagement } from '@/components/UserManagement';
 import type { User, Session } from '@supabase/supabase-js';
 
 const Admin = () => {
@@ -23,7 +24,8 @@ const Admin = () => {
   });
   const [isSignUp, setIsSignUp] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'members' | 'events' | 'newsletters'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'members' | 'events' | 'newsletters' | 'users'>('dashboard');
+  const [userRole, setUserRole] = useState<'admin' | 'committee' | 'pending' | null>(null);
   const [isAddGroupDialogOpen, setIsAddGroupDialogOpen] = useState(false);
   const [newGroupName, setNewGroupName] = useState('');
   const [availableGroups, setAvailableGroups] = useState<string[]>(['2024', '2025', 'Committee', 'LTL']);
@@ -49,17 +51,54 @@ const Admin = () => {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Fetch user role when user changes
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      if (user) {
+        try {
+          const { data, error } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', user.id)
+            .single();
+
+          if (error) {
+            console.error('Error fetching user role:', error);
+            setUserRole(null);
+          } else {
+            setUserRole(data.role);
+          }
+        } catch (error) {
+          console.error('Error in fetchUserRole:', error);
+          setUserRole(null);
+        }
+      } else {
+        setUserRole(null);
+      }
+    };
+
+    fetchUserRole();
+  }, [user]);
+
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
       if (isSignUp) {
-        // Only allow tejifry@gmail.com to sign up
-        if (loginData.email !== 'tejifry@gmail.com') {
+        // Check if there's a valid invitation or if it's the admin email
+        const { data: invitation } = await supabase
+          .from('invitations')
+          .select('*')
+          .eq('email', loginData.email)
+          .eq('used', false)
+          .gt('expires_at', new Date().toISOString())
+          .single();
+
+        if (!invitation && loginData.email !== 'tejifry@gmail.com') {
           toast({
             title: "Access Denied",
-            description: "Only the administrator email is allowed to create an account.",
+            description: "You need a valid invitation to create an account.",
             variant: "destructive"
           });
           setIsLoading(false);
@@ -140,8 +179,10 @@ const Admin = () => {
     });
   };
 
-  // Check if user is admin (only tejifry@gmail.com allowed)
-  const isAdmin = user?.email === 'tejifry@gmail.com';
+  // Check if user is admin
+  const isAdmin = userRole === 'admin';
+  const isCommittee = userRole === 'committee';
+  const isPending = userRole === 'pending';
 
   const handleAddGroup = () => {
     if (newGroupName.trim() && !availableGroups.includes(newGroupName.trim())) {
@@ -198,6 +239,35 @@ const Admin = () => {
             <Shield className="w-8 h-8 text-primary animate-pulse" />
           </div>
           <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show pending message for users awaiting approval
+  if (user && isPending) {
+    return (
+      <div className="min-h-screen py-8 px-4 flex items-center justify-center">
+        <div className="max-w-md w-full">
+          <Card className="card-elegant">
+            <CardHeader className="text-center">
+              <div className="w-16 h-16 bg-orange-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Clock className="w-8 h-8 text-orange-500" />
+              </div>
+              <CardTitle className="text-2xl text-orange-600">
+                Account Pending Approval
+              </CardTitle>
+              <p className="text-muted-foreground">
+                Your account is awaiting administrator approval. You will receive access once approved.
+              </p>
+            </CardHeader>
+            <CardContent>
+              <Button onClick={handleLogout} className="w-full">
+                <Lock className="w-4 h-4 mr-2" />
+                Logout
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       </div>
     );
@@ -327,6 +397,15 @@ const Admin = () => {
               <Mail className="w-4 h-4 mr-2" />
               Newsletters
             </Button>
+            {isAdmin && (
+              <Button 
+                variant={activeTab === 'users' ? 'default' : 'outline'}
+                onClick={() => setActiveTab('users')}
+              >
+                <Settings className="w-4 h-4 mr-2" />
+                Users
+              </Button>
+            )}
             <Button 
               variant="outline" 
               onClick={handleLogout}
@@ -398,9 +477,11 @@ const Admin = () => {
             </div>
           </>
         ) : activeTab === 'members' ? (
-          <MemberManagement isReadOnly={false} />
+          <MemberManagement isReadOnly={!isAdmin} />
         ) : activeTab === 'events' ? (
-          <EventManagement isReadOnly={false} />
+          <EventManagement isReadOnly={!isAdmin} />
+        ) : activeTab === 'users' ? (
+          <UserManagement />
         ) : (
           <NewsletterManagement />
         )}
