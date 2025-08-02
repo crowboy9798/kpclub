@@ -867,8 +867,49 @@ const MemberManagement = ({ isReadOnly = false }: MemberManagementProps) => {
         </div>
         
         <div className="flex gap-2">
+          {isAdmin && (
+            <Dialog open={isInviteDialogOpen} onOpenChange={setIsInviteDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="flex items-center gap-2">
+                  <UserPlus className="h-4 w-4" />
+                  Invite Committee Member
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Invite Committee Member</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="inviteEmail">Email Address</Label>
+                    <Input
+                      id="inviteEmail"
+                      type="email"
+                      value={inviteEmail}
+                      onChange={(e) => setInviteEmail(e.target.value)}
+                      placeholder="committee.member@example.com"
+                    />
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setIsInviteDialogOpen(false);
+                        setInviteEmail('');
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                    <Button onClick={handleSendInvitation}>
+                      Send Invitation
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+          )}
+          
           {!isReadOnly && (
-            <>
               <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                 <DialogTrigger asChild>
                   <Button>
@@ -876,6 +917,132 @@ const MemberManagement = ({ isReadOnly = false }: MemberManagementProps) => {
                     Add Member
                   </Button>
                 </DialogTrigger>
+                <DialogContent className="max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Add New Member</DialogTitle>
+                  </DialogHeader>
+                  <form onSubmit={handleAddMember} className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="first_name">First Name</Label>
+                        <Input
+                          id="first_name"
+                          value={formData.first_name}
+                          onChange={(e) => setFormData(prev => ({ ...prev, first_name: e.target.value }))}
+                          required
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="last_name">Last Name</Label>
+                        <Input
+                          id="last_name"
+                          value={formData.last_name}
+                          onChange={(e) => setFormData(prev => ({ ...prev, last_name: e.target.value }))}
+                          required
+                        />
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="email">Email</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="mobile">Mobile</Label>
+                      <Input
+                        id="mobile"
+                        value={formData.mobile}
+                        onChange={(e) => setFormData(prev => ({ ...prev, mobile: e.target.value }))}
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="address">Address</Label>
+                      <Input
+                        id="address"
+                        value={formData.address}
+                        onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
+                      />
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="suburb">Suburb</Label>
+                        <Input
+                          id="suburb"
+                          value={formData.suburb}
+                          onChange={(e) => setFormData(prev => ({ ...prev, suburb: e.target.value }))}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="pcode">Post Code</Label>
+                        <Input
+                          id="pcode"
+                          value={formData.pcode}
+                          onChange={(e) => setFormData(prev => ({ ...prev, pcode: e.target.value }))}
+                        />
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="dob">Date of Birth</Label>
+                      <Input
+                        id="dob"
+                        value={formData.dob}
+                        onChange={(e) => setFormData(prev => ({ ...prev, dob: e.target.value }))}
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="nok">Next of Kin Relationship</Label>
+                      <Input
+                        id="nok"
+                        value={formData.nok}
+                        onChange={(e) => setFormData(prev => ({ ...prev, nok: e.target.value }))}
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="nok_name">Next of Kin Name</Label>
+                      <Input
+                        id="nok_name"
+                        value={formData.nok_name}
+                        onChange={(e) => setFormData(prev => ({ ...prev, nok_name: e.target.value }))}
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="nok_contact">Next of Kin Contact</Label>
+                      <Input
+                        id="nok_contact"
+                        value={formData.nok_contact}
+                        onChange={(e) => setFormData(prev => ({ ...prev, nok_contact: e.target.value }))}
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="member_no">Member Number</Label>
+                      <Input
+                        id="member_no"
+                        value={formData.member_no}
+                        onChange={(e) => setFormData(prev => ({ ...prev, member_no: e.target.value }))}
+                      />
+                    </div>
+                    
+                    <div className="flex justify-end gap-2">
+                      <Button type="button" variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+                        Cancel
+                      </Button>
+                      <Button type="submit">Add Member</Button>
+                    </div>
+                  </form>
+                </DialogContent>
               </Dialog>
               
               <input
