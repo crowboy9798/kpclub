@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Calendar, Clock, MapPin, Users, Star, ArrowRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 
@@ -164,16 +163,16 @@ const Events = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button asChild size="lg" variant="default">
-              <Link to="/membership">
+              <a href="/membership">
                 <Users className="w-4 h-4 mr-2" />
                 Become a Member
-              </Link>
+              </a>
             </Button>
             <Button asChild size="lg" variant="outline">
-              <Link to="/contact">
+              <a href="/contact">
                 <ArrowRight className="w-4 h-4 mr-2" />
                 Contact Us
-              </Link>
+              </a>
             </Button>
           </div>
         </div>
