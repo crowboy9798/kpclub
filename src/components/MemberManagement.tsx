@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Member, MemberFormData } from '@/types/member';
+import { Member, MemberFormData, MemberInsert } from '@/types/member';
 import { Users, Plus, Upload, Download, Search, Edit, Trash2, ChevronUp, ChevronDown, Mail } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -35,7 +35,7 @@ const MemberManagement = ({ isReadOnly = false }: MemberManagementProps) => {
   });
   const [editingMember, setEditingMember] = useState<Member | null>(null);
   const [selectedMembers, setSelectedMembers] = useState<Set<string>>(new Set());
-  const [sortConfig, setSortConfig] = useState<{key: 'first_name' | 'last_name' | 'id' | 'member_no', direction: 'asc' | 'desc'} | null>(null);
+  const [sortConfig, setSortConfig] = useState<{key: 'First_Name' | 'Last_Name' | 'ID' | 'Member_No', direction: 'asc' | 'desc'} | null>(null);
   const [editingGroups, setEditingGroups] = useState<{[key: string]: string}>({});
   const [isEmailDialogOpen, setIsEmailDialogOpen] = useState(false);
   const [emailForm, setEmailForm] = useState({
@@ -53,8 +53,16 @@ const MemberManagement = ({ isReadOnly = false }: MemberManagementProps) => {
     first_name: '',
     last_name: '',
     email: '',
-    phone: '',
+    mobile: '',
+    address: '',
+    suburb: '',
+    pcode: '',
+    dob: '',
+    nok: '',
+    nok_name: '',
+    nok_contact: '',
     member_no: '',
+    phone: '',
     member_type: '',
     group_ids: [],
     address_street: '',
@@ -82,7 +90,7 @@ const MemberManagement = ({ isReadOnly = false }: MemberManagementProps) => {
       const { data, error } = await supabase
         .from('KPC2')
         .select('*')
-        .order('first_name');
+        .order('First_Name');
 
       if (error) throw error;
       setMembers(data || []);
@@ -102,20 +110,21 @@ const MemberManagement = ({ isReadOnly = false }: MemberManagementProps) => {
     try {
       const { data, error } = await supabase
         .from('KPC2')
-        .select('group_ids')
-        .not('group_ids', 'is', null);
+        .select('"Member_groups:"')
+        .not('"Member_groups:"', 'is', null);
 
       if (error) throw error;
-
+      
       const allGroups = new Set<string>();
       data?.forEach(member => {
-        if (member.group_ids && Array.isArray(member.group_ids)) {
-          member.group_ids.forEach(group => allGroups.add(group));
+        if (member["Member_groups:"]) {
+          member["Member_groups:"].forEach((group: string) => {
+            allGroups.add(group);
+          });
         }
       });
-
-      const combinedGroups = Array.from(allGroups).concat(manuallyAddedGroups);
-      setAvailableGroups([...new Set(combinedGroups)].sort());
+      
+      setAvailableGroups([...allGroups, ...manuallyAddedGroups]);
     } catch (error) {
       console.error('Error fetching groups:', error);
     }
@@ -123,9 +132,27 @@ const MemberManagement = ({ isReadOnly = false }: MemberManagementProps) => {
 
   const addMember = async () => {
     try {
+      // Convert form data to database format
+      const memberData: MemberInsert = {
+        First_Name: newMember.first_name,
+        Last_Name: newMember.last_name,
+        Email: newMember.email || null,
+        Mobile: newMember.mobile || newMember.phone || null,
+        Member_No: newMember.member_no || null,
+        DOB: newMember.dob || newMember.birthday || null,
+        Joined: newMember.date_joined || null,
+        Address: newMember.address || newMember.address_street || null,
+        Suburb: newMember.suburb || newMember.address_suburb || null,
+        Pcode: newMember.pcode || newMember.address_postcode || null,
+        NOK_relationship: newMember.nok || null,
+        NOK_NAME: newMember.nok_name || newMember.emergency_contact_name || null,
+        NOK_Contact: newMember.nok_contact || newMember.emergency_contact_phone || null,
+        "Member_groups:": newMember.group_ids || []
+      };
+
       const { data, error } = await supabase
         .from('KPC2')
-        .insert([newMember])
+        .insert(memberData as any)
         .select()
         .single();
 
@@ -137,8 +164,16 @@ const MemberManagement = ({ isReadOnly = false }: MemberManagementProps) => {
         first_name: '',
         last_name: '',
         email: '',
-        phone: '',
+        mobile: '',
+        address: '',
+        suburb: '',
+        pcode: '',
+        dob: '',
+        nok: '',
+        nok_name: '',
+        nok_contact: '',
         member_no: '',
+        phone: '',
         member_type: '',
         group_ids: [],
         address_street: '',
@@ -178,13 +213,13 @@ const MemberManagement = ({ isReadOnly = false }: MemberManagementProps) => {
       const { error } = await supabase
         .from('KPC2')
         .update(editingMember)
-        .eq('id', editingMember.id);
+        .eq('ID', editingMember.ID);
 
       if (error) throw error;
 
       setMembers(prev => 
         prev.map(member => 
-          member.id === editingMember.id ? editingMember : member
+          member.ID === editingMember.ID ? editingMember : member
         )
       );
       setEditingMember(null);
@@ -212,11 +247,11 @@ const MemberManagement = ({ isReadOnly = false }: MemberManagementProps) => {
       const { error } = await supabase
         .from('KPC2')
         .delete()
-        .eq('id', id);
+        .eq('ID', id);
 
       if (error) throw error;
 
-      setMembers(prev => prev.filter(member => member.id !== id));
+      setMembers(prev => prev.filter(member => member.ID !== id));
       toast({
         title: "Success",
         description: "Member deleted successfully"
@@ -231,122 +266,7 @@ const MemberManagement = ({ isReadOnly = false }: MemberManagementProps) => {
     }
   };
 
-  const handleImportCSV = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      const text = e.target?.result as string;
-      const lines = text.split('\n').filter(line => line.trim());
-      const headers = lines[0].split(',').map(h => h.trim().replace(/\"/g, ''));
-
-      const newMembers: MemberFormData[] = [];
-
-      for (let i = 1; i < lines.length; i++) {
-        const values = lines[i].split(',').map(v => v.trim().replace(/\"/g, ''));
-        const memberData: any = {};
-
-        headers.forEach((header, index) => {
-          const value = values[index] || '';
-
-          switch(header.toLowerCase()) {
-            case 'first_name':
-            case 'last_name':
-            case 'email':
-            case 'phone':
-            case 'member_no':
-            case 'member_type':
-            case 'address_street':
-            case 'address_suburb':
-            case 'address_postcode':
-            case 'address_state':
-            case 'date_joined':
-            case 'spouse_partner':
-            case 'emergency_contact_name':
-            case 'emergency_contact_phone':
-            case 'birthday':
-            case 'dietary_requirements':
-            case 'special_interests':
-            case 'group_specific_info':
-              memberData[header.toLowerCase()] = value;
-              break;
-            case 'groups':
-            case 'group_ids':
-              memberData.group_ids = value ? value.split(';').map(g => g.trim()) : [];
-              break;
-          }
-        });
-
-        if (memberData.first_name && memberData.last_name) {
-          newMembers.push(memberData);
-        }
-      }
-
-      if (newMembers.length > 0) {
-        try {
-          const { data, error } = await supabase
-            .from('KPC2')
-            .insert(newMembers)
-            .select();
-
-          if (error) throw error;
-
-          setMembers(prev => [...prev, ...data]);
-          toast({
-            title: "Success",
-            description: `Imported ${newMembers.length} members successfully`
-          });
-
-          await fetchGroups();
-        } catch (error) {
-          console.error('Error importing members:', error);
-          toast({
-            title: "Error",
-            description: "Failed to import members",
-            variant: "destructive"
-          });
-        }
-      }
-    };
-    
-    reader.readAsText(file);
-    event.target.value = '';
-  };
-
-  const handleExportCSV = () => {
-    const headers = [
-      'first_name', 'last_name', 'email', 'phone', 'member_no', 'member_type',
-      'groups', 'address_street', 'address_suburb', 'address_postcode', 'address_state',
-      'date_joined', 'spouse_partner', 'emergency_contact_name', 'emergency_contact_phone',
-      'birthday', 'dietary_requirements', 'special_interests', 'group_specific_info'
-    ];
-
-    const csvContent = [
-      headers.join(','),
-      ...filteredAndSortedMembers.map(member => 
-        headers.map(header => {
-          if (header === 'groups') {
-            return `"${member.group_ids ? member.group_ids.join(';') : ''}"`;
-          }
-          const value = member[header as keyof Member] || '';
-          return `"${String(value).replace(/"/g, '""')}"`;
-        }).join(',')
-      )
-    ].join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `kpc-members-${new Date().toISOString().split('T')[0]}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
-  };
-
-  const handleSort = (key: 'first_name' | 'last_name' | 'id' | 'member_no') => {
+  const handleSort = (key: 'First_Name' | 'Last_Name' | 'ID' | 'Member_No') => {
     let direction: 'asc' | 'desc' = 'asc';
     
     if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
@@ -369,24 +289,24 @@ const MemberManagement = ({ isReadOnly = false }: MemberManagementProps) => {
   const filteredAndSortedMembers = useMemo(() => {
     let filtered = members.filter(member => {
       const matchesSearch = 
-        member.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        member.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        member.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        member.member_no.toLowerCase().includes(searchTerm.toLowerCase());
+        (member.First_Name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (member.Last_Name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (member.Email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (member.Member_No || '').toLowerCase().includes(searchTerm.toLowerCase());
 
       const matchesYear = filterYear === 'all' || 
-        (member.date_joined && member.date_joined.includes(filterYear));
+        (member.Joined && member.Joined.includes(filterYear));
 
       const matchesGroup = filterGroup === 'all' || 
-        (member.group_ids && member.group_ids.includes(filterGroup));
+        (member["Member_groups:"] && member["Member_groups:"].includes(filterGroup));
 
       return matchesSearch && matchesYear && matchesGroup;
     });
 
     if (sortConfig) {
       filtered.sort((a, b) => {
-        let aValue = a[sortConfig.key];
-        let bValue = b[sortConfig.key];
+        let aValue = a[sortConfig.key] || '';
+        let bValue = b[sortConfig.key] || '';
 
         if (typeof aValue === 'string') aValue = aValue.toLowerCase();
         if (typeof bValue === 'string') bValue = bValue.toLowerCase();
@@ -416,81 +336,9 @@ const MemberManagement = ({ isReadOnly = false }: MemberManagementProps) => {
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedMembers(new Set(filteredAndSortedMembers.map(m => m.id)));
+      setSelectedMembers(new Set(filteredAndSortedMembers.map(m => m.ID)));
     } else {
       setSelectedMembers(new Set());
-    }
-  };
-
-  const addGroup = () => {
-    if (newGroupName.trim() && !availableGroups.includes(newGroupName.trim())) {
-      const updatedGroups = [...manuallyAddedGroups, newGroupName.trim()];
-      setManuallyAddedGroups(updatedGroups);
-      localStorage.setItem('kpc-custom-groups', JSON.stringify(updatedGroups));
-      setAvailableGroups(prev => [...prev, newGroupName.trim()].sort());
-      setNewGroupName('');
-      setIsAddGroupDialogOpen(false);
-      
-      toast({
-        title: "Success",
-        description: "Group added successfully"
-      });
-    }
-  };
-
-  const handleSendEmails = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (selectedMembers.size === 0) {
-      toast({
-        title: "Error",
-        description: "Please select at least one member",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setSendingEmails(true);
-
-    try {
-      const selectedMembersList = members.filter(m => selectedMembers.has(m.id));
-      
-      const { data, error } = await supabase.functions.invoke('send-bulk-email', {
-        body: {
-          recipients: selectedMembersList.map(m => ({
-            email: m.email,
-            firstName: m.first_name,
-            lastName: m.last_name
-          })),
-          ...emailForm
-        }
-      });
-
-      if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: `Email sent to ${selectedMembers.size} members`
-      });
-
-      setIsEmailDialogOpen(false);
-      setEmailForm({
-        subject: '',
-        message: '',
-        fromEmail: 'onboarding@resend.dev',
-        fromName: 'Kensington Probus Club',
-        attachments: []
-      });
-      setSelectedMembers(new Set());
-    } catch (error) {
-      console.error('Error sending emails:', error);
-      toast({
-        title: "Error",
-        description: "Failed to send emails",
-        variant: "destructive"
-      });
-    } finally {
-      setSendingEmails(false);
     }
   };
 
@@ -519,30 +367,6 @@ const MemberManagement = ({ isReadOnly = false }: MemberManagementProps) => {
             </Button>
           )}
           
-          {!isReadOnly && (
-            <>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".csv,.tsv,.txt"
-                onChange={handleImportCSV}
-                style={{ display: 'none' }}
-              />
-              <Button 
-                variant="outline"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                <Upload className="w-4 h-4 mr-2" />
-                Import CSV
-              </Button>
-            </>
-          )}
-          
-          <Button variant="outline" onClick={handleExportCSV}>
-            <Download className="w-4 h-4 mr-2" />
-            Export CSV
-          </Button>
-
           {!isReadOnly && (
             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
               <DialogTrigger asChild>
@@ -588,48 +412,11 @@ const MemberManagement = ({ isReadOnly = false }: MemberManagementProps) => {
                   </div>
                   
                   <div>
-                    <Label htmlFor="phone">Phone</Label>
+                    <Label htmlFor="mobile">Mobile</Label>
                     <Input
-                      id="phone"
-                      value={newMember.phone}
-                      onChange={(e) => setNewMember({...newMember, phone: e.target.value})}
-                    />
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="member_no">Member No.</Label>
-                      <Input
-                        id="member_no"
-                        value={newMember.member_no}
-                        onChange={(e) => setNewMember({...newMember, member_no: e.target.value})}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="member_type">Member Type</Label>
-                      <Select
-                        value={newMember.member_type}
-                        onValueChange={(value) => setNewMember({...newMember, member_type: value})}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Full">Full</SelectItem>
-                          <SelectItem value="Associate">Associate</SelectItem>
-                          <SelectItem value="Honorary">Honorary</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="date_joined">Date Joined</Label>
-                    <Input
-                      id="date_joined"
-                      type="date"
-                      value={newMember.date_joined}
-                      onChange={(e) => setNewMember({...newMember, date_joined: e.target.value})}
+                      id="mobile"
+                      value={newMember.mobile}
+                      onChange={(e) => setNewMember({...newMember, mobile: e.target.value})}
                     />
                   </div>
                   
@@ -688,39 +475,6 @@ const MemberManagement = ({ isReadOnly = false }: MemberManagementProps) => {
                   ))}
                 </SelectContent>
               </Select>
-              
-              {!isReadOnly && (
-                <Dialog open={isAddGroupDialogOpen} onOpenChange={setIsAddGroupDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button variant="outline" size="sm">
-                      <Plus className="w-4 h-4 mr-1" />
-                      Group
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-sm">
-                    <DialogHeader>
-                      <DialogTitle>Add New Group</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                      <div>
-                        <Label htmlFor="groupName">Group Name</Label>
-                        <Input
-                          id="groupName"
-                          value={newGroupName}
-                          onChange={(e) => setNewGroupName(e.target.value)}
-                          placeholder="Enter group name"
-                        />
-                      </div>
-                      <div className="flex justify-end gap-2">
-                        <Button variant="outline" onClick={() => setIsAddGroupDialogOpen(false)}>
-                          Cancel
-                        </Button>
-                        <Button onClick={addGroup}>Add Group</Button>
-                      </div>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              )}
             </div>
           </div>
         </CardContent>
@@ -747,58 +501,54 @@ const MemberManagement = ({ isReadOnly = false }: MemberManagementProps) => {
                   </TableHead>
                   <TableHead 
                     className="cursor-pointer hover:bg-muted/50"
-                    onClick={() => handleSort('member_no')}
+                    onClick={() => handleSort('Member_No')}
                   >
                     <div className="flex items-center gap-1">
                       Member No.
-                      {getSortIcon('member_no')}
+                      {getSortIcon('Member_No')}
                     </div>
                   </TableHead>
                   <TableHead 
                     className="cursor-pointer hover:bg-muted/50"
-                    onClick={() => handleSort('first_name')}
+                    onClick={() => handleSort('First_Name')}
                   >
                     <div className="flex items-center gap-1">
                       First Name
-                      {getSortIcon('first_name')}
+                      {getSortIcon('First_Name')}
                     </div>
                   </TableHead>
                   <TableHead 
                     className="cursor-pointer hover:bg-muted/50"
-                    onClick={() => handleSort('last_name')}
+                    onClick={() => handleSort('Last_Name')}
                   >
                     <div className="flex items-center gap-1">
                       Last Name
-                      {getSortIcon('last_name')}
+                      {getSortIcon('Last_Name')}
                     </div>
                   </TableHead>
                   <TableHead>Email</TableHead>
-                  <TableHead>Phone</TableHead>
-                  <TableHead>Type</TableHead>
+                  <TableHead>Mobile</TableHead>
                   <TableHead>Groups</TableHead>
                   {!isReadOnly && <TableHead>Actions</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredAndSortedMembers.map((member) => (
-                  <TableRow key={member.id}>
+                  <TableRow key={member.ID}>
                     <TableCell>
                       <Checkbox
-                        checked={selectedMembers.has(member.id)}
-                        onCheckedChange={(checked) => handleSelectMember(member.id, checked as boolean)}
+                        checked={selectedMembers.has(member.ID)}
+                        onCheckedChange={(checked) => handleSelectMember(member.ID, checked as boolean)}
                       />
                     </TableCell>
-                    <TableCell>{member.member_no}</TableCell>
-                    <TableCell>{member.first_name}</TableCell>
-                    <TableCell>{member.last_name}</TableCell>
-                    <TableCell>{member.email}</TableCell>
-                    <TableCell>{member.phone}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{member.member_type}</Badge>
-                    </TableCell>
+                    <TableCell>{member.Member_No}</TableCell>
+                    <TableCell>{member.First_Name}</TableCell>
+                    <TableCell>{member.Last_Name}</TableCell>
+                    <TableCell>{member.Email}</TableCell>
+                    <TableCell>{member.Mobile}</TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-1">
-                        {member.group_ids?.map((group, index) => (
+                        {member["Member_groups:"]?.map((group, index) => (
                           <Badge key={index} variant="secondary">{group}</Badge>
                         ))}
                       </div>
@@ -816,7 +566,7 @@ const MemberManagement = ({ isReadOnly = false }: MemberManagementProps) => {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => deleteMember(member.id)}
+                            onClick={() => deleteMember(member.ID)}
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>
@@ -844,16 +594,16 @@ const MemberManagement = ({ isReadOnly = false }: MemberManagementProps) => {
                   <Label htmlFor="edit_first_name">First Name</Label>
                   <Input
                     id="edit_first_name"
-                    value={editingMember.first_name}
-                    onChange={(e) => setEditingMember({...editingMember, first_name: e.target.value})}
+                    value={editingMember.First_Name}
+                    onChange={(e) => setEditingMember({...editingMember, First_Name: e.target.value})}
                   />
                 </div>
                 <div>
                   <Label htmlFor="edit_last_name">Last Name</Label>
                   <Input
                     id="edit_last_name"
-                    value={editingMember.last_name}
-                    onChange={(e) => setEditingMember({...editingMember, last_name: e.target.value})}
+                    value={editingMember.Last_Name}
+                    onChange={(e) => setEditingMember({...editingMember, Last_Name: e.target.value})}
                   />
                 </div>
               </div>
@@ -864,52 +614,16 @@ const MemberManagement = ({ isReadOnly = false }: MemberManagementProps) => {
                   <Input
                     id="edit_email"
                     type="email"
-                    value={editingMember.email}
-                    onChange={(e) => setEditingMember({...editingMember, email: e.target.value})}
+                    value={editingMember.Email || ''}
+                    onChange={(e) => setEditingMember({...editingMember, Email: e.target.value})}
                   />
                 </div>
                 <div>
-                  <Label htmlFor="edit_phone">Phone</Label>
+                  <Label htmlFor="edit_mobile">Mobile</Label>
                   <Input
-                    id="edit_phone"
-                    value={editingMember.phone}
-                    onChange={(e) => setEditingMember({...editingMember, phone: e.target.value})}
-                  />
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <Label htmlFor="edit_member_no">Member No.</Label>
-                  <Input
-                    id="edit_member_no"
-                    value={editingMember.member_no}
-                    onChange={(e) => setEditingMember({...editingMember, member_no: e.target.value})}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="edit_member_type">Member Type</Label>
-                  <Select
-                    value={editingMember.member_type}
-                    onValueChange={(value) => setEditingMember({...editingMember, member_type: value})}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Full">Full</SelectItem>
-                      <SelectItem value="Associate">Associate</SelectItem>
-                      <SelectItem value="Honorary">Honorary</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="edit_date_joined">Date Joined</Label>
-                  <Input
-                    id="edit_date_joined"
-                    type="date"
-                    value={editingMember.date_joined}
-                    onChange={(e) => setEditingMember({...editingMember, date_joined: e.target.value})}
+                    id="edit_mobile"
+                    value={editingMember.Mobile || ''}
+                    onChange={(e) => setEditingMember({...editingMember, Mobile: e.target.value})}
                   />
                 </div>
               </div>
@@ -922,72 +636,6 @@ const MemberManagement = ({ isReadOnly = false }: MemberManagementProps) => {
               </div>
             </div>
           )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Email Dialog */}
-      <Dialog open={isEmailDialogOpen} onOpenChange={setIsEmailDialogOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Send Email to Selected Members</DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleSendEmails} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="fromName">From Name</Label>
-                <Input
-                  id="fromName"
-                  value={emailForm.fromName}
-                  onChange={(e) => setEmailForm({...emailForm, fromName: e.target.value})}
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="fromEmail">From Email</Label>
-                <Input
-                  id="fromEmail"
-                  type="email"
-                  value={emailForm.fromEmail}
-                  onChange={(e) => setEmailForm({...emailForm, fromEmail: e.target.value})}
-                  required
-                />
-              </div>
-            </div>
-            
-            <div>
-              <Label htmlFor="subject">Subject</Label>
-              <Input
-                id="subject"
-                value={emailForm.subject}
-                onChange={(e) => setEmailForm({...emailForm, subject: e.target.value})}
-                required
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="message">Message</Label>
-              <Textarea
-                id="message"
-                rows={6}
-                value={emailForm.message}
-                onChange={(e) => setEmailForm({...emailForm, message: e.target.value})}
-                required
-              />
-            </div>
-            
-            <div className="flex justify-end gap-2">
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => setIsEmailDialogOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={sendingEmails || selectedMembers.size === 0}>
-                {sendingEmails ? 'Sending...' : `Send Email (${selectedMembers.size})`}
-              </Button>
-            </div>
-          </form>
         </DialogContent>
       </Dialog>
     </div>
