@@ -342,6 +342,79 @@ const MemberManagement = ({ isReadOnly = false }: MemberManagementProps) => {
     }
   };
 
+  const handleSendEmails = async () => {
+    if (!emailForm.subject || !emailForm.message) {
+      toast({
+        title: "Error",
+        description: "Please fill in both subject and message",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const selectedMembersList = members.filter(member => selectedMembers.has(member.ID));
+    const recipients = selectedMembersList.map(member => ({
+      email: member.Email || '',
+      first_name: member.First_Name || '',
+      last_name: member.Last_Name || ''
+    }));
+
+    // Filter out members without email addresses
+    const validRecipients = recipients.filter(recipient => recipient.email);
+    
+    if (validRecipients.length === 0) {
+      toast({
+        title: "Error",
+        description: "No valid email addresses found for selected members",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setSendingEmails(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('send-bulk-email', {
+        body: {
+          recipients: validRecipients,
+          subject: emailForm.subject,
+          message: emailForm.message,
+          fromEmail: emailForm.fromEmail,
+          fromName: emailForm.fromName,
+          attachments: emailForm.attachments
+        }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: `Emails sent successfully to ${validRecipients.length} members`,
+      });
+
+      // Reset form and close dialog
+      setEmailForm({
+        subject: '',
+        message: '',
+        fromEmail: 'onboarding@resend.dev',
+        fromName: 'Kensington Probus Club',
+        attachments: []
+      });
+      setIsEmailDialogOpen(false);
+      setSelectedMembers(new Set());
+
+    } catch (error) {
+      console.error('Error sending emails:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send emails. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setSendingEmails(false);
+    }
+  };
+
   if (loading) {
     return <div className="flex justify-center p-8">Loading members...</div>;
   }
@@ -636,6 +709,62 @@ const MemberManagement = ({ isReadOnly = false }: MemberManagementProps) => {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Email Dialog */}
+      <Dialog open={isEmailDialogOpen} onOpenChange={setIsEmailDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Send Email to Selected Members ({selectedMembers.size})</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="email_subject">Subject</Label>
+              <Input
+                id="email_subject"
+                value={emailForm.subject}
+                onChange={(e) => setEmailForm({...emailForm, subject: e.target.value})}
+                placeholder="Enter email subject"
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="email_message">Message</Label>
+              <Textarea
+                id="email_message"
+                value={emailForm.message}
+                onChange={(e) => setEmailForm({...emailForm, message: e.target.value})}
+                placeholder="Enter your message here. You can use {first_name}, {last_name}, or {full_name} for personalization."
+                rows={8}
+              />
+            </div>
+            
+            <div className="text-sm text-muted-foreground">
+              <p><strong>Available placeholders:</strong></p>
+              <ul className="list-disc list-inside space-y-1">
+                <li>{`{first_name}`} - Member's first name</li>
+                <li>{`{last_name}`} - Member's last name</li>
+                <li>{`{full_name}`} - Member's full name</li>
+              </ul>
+            </div>
+            
+            <div className="flex justify-end gap-2 pt-4">
+              <Button 
+                variant="outline" 
+                onClick={() => setIsEmailDialogOpen(false)}
+                disabled={sendingEmails}
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleSendEmails}
+                disabled={sendingEmails || !emailForm.subject || !emailForm.message}
+              >
+                {sendingEmails ? 'Sending...' : `Send to ${selectedMembers.size} members`}
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
