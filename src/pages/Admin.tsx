@@ -29,6 +29,13 @@ const Admin = () => {
   const [isAddGroupDialogOpen, setIsAddGroupDialogOpen] = useState(false);
   const [newGroupName, setNewGroupName] = useState('');
   const [availableGroups, setAvailableGroups] = useState<string[]>(['2024', '2025', 'Committee', 'LTL']);
+  const [lastActivityTime, setLastActivityTime] = useState<number>(Date.now());
+  const [sessionExpired, setSessionExpired] = useState(false);
+
+  // Session timeout duration: 30 minutes for admin, 60 minutes for committee
+  const getSessionTimeout = () => {
+    return userRole === 'admin' ? 30 * 60 * 1000 : 60 * 60 * 1000; // milliseconds
+  };
 
   // Initialize authentication state
   useEffect(() => {
@@ -67,6 +74,9 @@ const Admin = () => {
             setUserRole(null);
           } else {
             setUserRole(data.role);
+            // Reset session timer when role is fetched
+            setLastActivityTime(Date.now());
+            setSessionExpired(false);
           }
         } catch (error) {
           console.error('Error in fetchUserRole:', error);
@@ -78,6 +88,53 @@ const Admin = () => {
     };
 
     fetchUserRole();
+  }, [user]);
+
+  // Session timeout monitoring
+  useEffect(() => {
+    if (!user || !userRole) return;
+
+    const checkSessionTimeout = () => {
+      const timeElapsed = Date.now() - lastActivityTime;
+      const timeoutDuration = getSessionTimeout();
+      
+      if (timeElapsed > timeoutDuration) {
+        setSessionExpired(true);
+        toast({
+          title: "Session Expired",
+          description: "Your session has expired for security. Please log in again.",
+          variant: "destructive"
+        });
+        handleLogout();
+      }
+    };
+
+    // Check every minute
+    const interval = setInterval(checkSessionTimeout, 60000);
+    
+    return () => clearInterval(interval);
+  }, [user, userRole, lastActivityTime]);
+
+  // Activity tracking - update last activity time on user interaction
+  useEffect(() => {
+    if (!user) return;
+
+    const updateActivity = () => {
+      setLastActivityTime(Date.now());
+    };
+
+    // Track mouse movements, clicks, and keyboard activity
+    const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'];
+    
+    events.forEach(event => {
+      document.addEventListener(event, updateActivity, true);
+    });
+
+    return () => {
+      events.forEach(event => {
+        document.removeEventListener(event, updateActivity, true);
+      });
+    };
   }, [user]);
 
   const handleAuth = async (e: React.FormEvent) => {
@@ -368,6 +425,11 @@ const Admin = () => {
             <p className="text-muted-foreground">
               Welcome back Administrator! Manage your club's information and activities.
             </p>
+            {userRole && (
+              <div className="text-sm text-muted-foreground mt-1">
+                Session timeout: {userRole === 'admin' ? '30 minutes' : '60 minutes'} of inactivity
+              </div>
+            )}
           </div>
           <div className="flex gap-2">
             <Button 
