@@ -203,25 +203,29 @@ const Admin = () => {
       icon: Calendar,
       title: "Event Management",
       description: "Add, edit, and delete club events",
-      actions: ["Add New Event", "Edit Existing Events"]
+      actions: isAdmin ? ["Add New Event", "Edit Existing Events"] : ["View Events"],
+      allowedRoles: ['admin', 'committee']
     },
     {
       icon: Users,
-      title: "Member Management",
+      title: "Member Management", 
       description: "Manage member database and profiles",
-      actions: ["View Member List", "Add New Members", "Update Member Info", "ADD NEW GROUP"]
+      actions: isAdmin ? ["View Member List", "Add New Members", "Update Member Info", "Export Data", "ADD NEW GROUP"] : ["View Member List"],
+      allowedRoles: ['admin', 'committee']
     },
     {
       icon: Mail,
       title: "Communications",
-      description: "Manage newsletters and announcements",
-      actions: ["Manage Newsletters", "Send Newsletter"]
+      description: "Manage newsletters and email communications",
+      actions: ["Manage Newsletters", "Send Filtered Emails"],
+      allowedRoles: ['admin', 'committee']
     },
     {
       icon: Settings,
       title: "Site Management",
       description: "Update website content and settings",
-      actions: ["Edit Homepage", "Update Club Info"]
+      actions: ["Edit Homepage", "Update Club Info"],
+      allowedRoles: ['admin']
     }
   ];
 
@@ -386,59 +390,64 @@ const Admin = () => {
 
             {/* Admin Features */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {adminFeatures.map((feature, index) => {
-                const Icon = feature.icon;
-                
-                return (
-                  <Card key={index} className="card-elegant">
-                    <CardHeader>
-                      <CardTitle className="flex items-center text-primary">
-                        <Icon className="w-6 h-6 mr-3" />
-                        {feature.title}
-                      </CardTitle>
-                      <p className="text-muted-foreground">{feature.description}</p>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-2">
-                        {feature.actions.map((action, actionIndex) => (
-                          <Button
-                            key={actionIndex}
-                            variant="ghost"
-                            className="w-full justify-start text-left"
-                            onClick={() => {
-                              if (feature.title === "Member Management") {
-                                if (action === "ADD NEW GROUP") {
-                                  setIsAddGroupDialogOpen(true);
-                                } else {
-                                  setActiveTab('members');
-                                }
-                              } else if (feature.title === "Event Management") {
-                                setActiveTab('events');
-                              } else if (feature.title === "Communications") {
-                                if (action === "Manage Newsletters") {
-                                  setActiveTab('newsletters');
+              {adminFeatures
+                .filter(feature => 
+                  feature.allowedRoles.includes('admin') && isAdmin || 
+                  feature.allowedRoles.includes('committee') && isCommittee
+                )
+                .map((feature, index) => {
+                  const Icon = feature.icon;
+                  
+                  return (
+                    <Card key={index} className="card-elegant">
+                      <CardHeader>
+                        <CardTitle className="flex items-center text-primary">
+                          <Icon className="w-6 h-6 mr-3" />
+                          {feature.title}
+                        </CardTitle>
+                        <p className="text-muted-foreground">{feature.description}</p>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2">
+                          {feature.actions.map((action, actionIndex) => (
+                            <Button
+                              key={actionIndex}
+                              variant="ghost"
+                              className="w-full justify-start text-left"
+                              onClick={() => {
+                                if (feature.title === "Member Management") {
+                                  if (action === "ADD NEW GROUP" && isAdmin) {
+                                    setIsAddGroupDialogOpen(true);
+                                  } else {
+                                    setActiveTab('members');
+                                  }
+                                } else if (feature.title === "Event Management") {
+                                  setActiveTab('events');
+                                } else if (feature.title === "Communications") {
+                                  if (action === "Manage Newsletters") {
+                                    setActiveTab('newsletters');
+                                  } else {
+                                    toast({
+                                      title: "Feature Coming Soon",
+                                      description: `${action} functionality will be available in the next update.`
+                                    });
+                                  }
                                 } else {
                                   toast({
                                     title: "Feature Coming Soon",
                                     description: `${action} functionality will be available in the next update.`
                                   });
                                 }
-                              } else {
-                                toast({
-                                  title: "Feature Coming Soon",
-                                  description: `${action} functionality will be available in the next update.`
-                                });
-                              }
-                            }}
-                          >
-                            {action}
-                          </Button>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
+                              }}
+                            >
+                              {action}
+                            </Button>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
             </div>
           </>
         ) : activeTab === 'members' ? (
