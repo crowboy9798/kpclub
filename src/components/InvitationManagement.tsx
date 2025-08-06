@@ -68,6 +68,56 @@ const InvitationManagement = ({ user, isAdmin }: InvitationManagementProps) => {
 
     setIsLoading(true);
     try {
+      // First check if the email belongs to a member with "Committee" in their groups
+      const { data: member, error: memberError } = await supabase
+        .from('KPC2')
+        .select('Email, "Member_groups:"')
+        .ilike('Email', newInvitation.email.trim())
+        .single();
+
+      if (memberError || !member) {
+        toast({
+          title: "Member Not Found",
+          description: "This email address is not found in the member database.",
+          variant: "destructive"
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      // Check if member has "Committee" in their groups
+      const memberGroups = member["Member_groups:"] || [];
+      const hasCommitteeGroup = memberGroups.some((group: string) => 
+        group && group.toLowerCase().includes('committee')
+      );
+
+      if (!hasCommitteeGroup) {
+        toast({
+          title: "Not Eligible",
+          description: "This member does not have 'Committee' in their member groups. Only committee members can receive invitations.",
+          variant: "destructive"
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      // Check if invitation already exists for this email
+      const { data: existingInvitation } = await supabase
+        .from('invitations')
+        .select('id, used, expires_at')
+        .eq('email', newInvitation.email.trim())
+        .single();
+
+      if (existingInvitation && !existingInvitation.used && new Date(existingInvitation.expires_at) > new Date()) {
+        toast({
+          title: "Invitation Already Exists",
+          description: "An active invitation already exists for this email address.",
+          variant: "destructive"
+        });
+        setIsLoading(false);
+        return;
+      }
+
       // Create invitation record
       const { error } = await supabase
         .from('invitations')
@@ -162,6 +212,9 @@ const InvitationManagement = ({ user, isAdmin }: InvitationManagementProps) => {
             <UserPlus className="w-5 h-5 mr-2" />
             Send Committee Invitation
           </CardTitle>
+          <p className="text-sm text-muted-foreground mt-2">
+            Only members with "Committee" in their member groups can receive invitations.
+          </p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleCreateInvitation} className="space-y-4">
