@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Shield, Lock, Users, Calendar, Settings, Mail, Eye, EyeOff } from 'lucide-react';
+import { Shield, Lock, Users, Calendar, Settings, Mail, Eye, EyeOff, UserPlus } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import MemberManagement from '@/components/MemberManagement';
 import EventManagement from '@/components/EventManagement';
 import NewsletterManagement from '@/components/NewsletterManagement';
+import InvitationManagement from '@/components/InvitationManagement';
 import type { User, Session } from '@supabase/supabase-js';
 
 const Admin = () => {
@@ -23,10 +24,28 @@ const Admin = () => {
   });
   const [isSignUp, setIsSignUp] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'members' | 'events' | 'newsletters'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'members' | 'events' | 'newsletters' | 'invitations'>('dashboard');
   const [isAddGroupDialogOpen, setIsAddGroupDialogOpen] = useState(false);
   const [newGroupName, setNewGroupName] = useState('');
   const [availableGroups, setAvailableGroups] = useState<string[]>(['2024', '2025', 'Committee', 'LTL']);
+  const [userRole, setUserRole] = useState<string | null>(null);
+
+  // Fetch user role
+  const fetchUserRole = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId)
+        .single();
+
+      if (error) throw error;
+      setUserRole(data?.role || null);
+    } catch (error) {
+      console.error('Error fetching user role:', error);
+      setUserRole(null);
+    }
+  };
 
   // Initialize authentication state
   useEffect(() => {
@@ -36,6 +55,15 @@ const Admin = () => {
         setSession(session);
         setUser(session?.user ?? null);
         setIsLoading(false);
+        
+        // Fetch user role when user changes
+        if (session?.user) {
+          setTimeout(() => {
+            fetchUserRole(session.user.id);
+          }, 0);
+        } else {
+          setUserRole(null);
+        }
       }
     );
 
@@ -44,6 +72,11 @@ const Admin = () => {
       setSession(session);
       setUser(session?.user ?? null);
       setIsLoading(false);
+      
+      // Fetch user role for existing session
+      if (session?.user) {
+        fetchUserRole(session.user.id);
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -140,8 +173,10 @@ const Admin = () => {
     });
   };
 
-  // Check if user is admin (only tejifry@gmail.com allowed)
-  const isAdmin = user?.email === 'tejifry@gmail.com';
+  // Check if user is admin or committee
+  const isAdmin = user?.email === 'tejifry@gmail.com' || userRole === 'admin';
+  const isCommittee = userRole === 'committee';
+  const hasAccess = isAdmin || isCommittee;
 
   const handleAddGroup = () => {
     if (newGroupName.trim() && !availableGroups.includes(newGroupName.trim())) {
@@ -327,6 +362,15 @@ const Admin = () => {
               <Mail className="w-4 h-4 mr-2" />
               Newsletters
             </Button>
+            {isAdmin && (
+              <Button 
+                variant={activeTab === 'invitations' ? 'default' : 'outline'}
+                onClick={() => setActiveTab('invitations')}
+              >
+                <UserPlus className="w-4 h-4 mr-2" />
+                Invitations
+              </Button>
+            )}
             <Button 
               variant="outline" 
               onClick={handleLogout}
@@ -398,9 +442,11 @@ const Admin = () => {
             </div>
           </>
         ) : activeTab === 'members' ? (
-          <MemberManagement isReadOnly={false} />
+          <MemberManagement isReadOnly={isCommittee} />
         ) : activeTab === 'events' ? (
-          <EventManagement isReadOnly={false} />
+          <EventManagement isReadOnly={isCommittee} />
+        ) : activeTab === 'invitations' ? (
+          <InvitationManagement user={user} isAdmin={isAdmin} />
         ) : (
           <NewsletterManagement />
         )}
