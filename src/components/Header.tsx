@@ -27,8 +27,8 @@ const Header = () => {
               <img src="/lovable-uploads/a6d3b80c-ee71-454e-989a-d2fd3a8a98ef.png" alt="Probus Logo" className="w-12 h-12 rounded-full" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-primary-foreground">Kensington Probus Club</h1>
-              <p className="text-sm text-primary-foreground/80">Connecting Community & Friendship</p>
+              <h1 className="text-lg font-bold text-primary-foreground">Kensington Probus Club</h1>
+              <p className="text-xs text-primary-foreground/80">Connecting Community & Friendship</p>
             </div>
           </Link>
 
