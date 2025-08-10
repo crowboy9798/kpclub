@@ -1,0 +1,16 @@
+{
+  "name": "Kensington Probus Club",
+  "short_name": "Probus Club",
+  "icons": [
+    {
+      "src": "/lovable-uploads/a6d3b80c-ee71-454e-989a-d2fd3a8a98ef.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0b3b82",
+  "theme_color": "#0b3b82"
+}
