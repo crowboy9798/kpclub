@@ -72,52 +72,9 @@ const Events = () => {
           </p>
         </div>
 
-        {/* Featured Events */}
-        <div className="mb-12">
-          <h2 className="text-2xl font-semibold text-primary mb-6 flex items-center">
-            <Star className="w-6 h-6 text-secondary mr-2" />
-            Featured Events
-          </h2>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {upcomingEvents.filter(event => event.featured).map((event) => (
-              <Card key={event.id} className="card-elegant overflow-hidden">
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${getCategoryColor(event.category)}`}>
-                      {event.category}
-                    </span>
-                    <Star className="w-5 h-5 text-secondary" />
-                  </div>
-                  
-                  <h3 className="text-xl font-semibold text-primary mb-3">{event.title}</h3>
-                  <p className="text-muted-foreground mb-4 leading-relaxed">{event.description}</p>
-                  
-                  <div className="space-y-2 mb-4">
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <Calendar className="w-4 h-4 mr-2 text-primary" />
-                       {format(new Date(event.date_start), 'PPPP')}
-                    </div>
-                    {event.time_start && (
-                      <div className="flex items-center text-sm text-muted-foreground">
-                        <Clock className="w-4 h-4 mr-2 text-primary" />
-                        {event.time_start} {event.time_end && `- ${event.time_end}`}
-                      </div>
-                    )}
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <MapPin className="w-4 h-4 mr-2 text-primary" />
-                      {event.location}
-                    </div>
-                  </div>
-                  
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-
         {/* All Upcoming Events */}
         <div>
-          <h2 className="text-2xl font-semibold text-primary mb-6">All Upcoming Events</h2>
+          <h2 className="text-2xl font-semibold text-primary mb-6">Upcoming Events</h2>
           {loading ? (
             <div className="text-center py-8">Loading events...</div>
           ) : (
@@ -129,7 +86,6 @@ const Events = () => {
                       <span className={`px-3 py-1 rounded-full text-sm font-medium ${getCategoryColor(event.category)}`}>
                         {event.category}
                       </span>
-                      {event.featured && <Star className="w-4 h-4 text-secondary" />}
                     </div>
                     
                     <h3 className="text-lg font-semibold text-primary mb-2">{event.title}</h3>

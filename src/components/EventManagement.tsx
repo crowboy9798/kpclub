@@ -5,13 +5,13 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Plus, Edit2, Trash2, Calendar as CalendarIcon, Clock, MapPin, Users, Star } from 'lucide-react';
+import { Plus, Edit2, Trash2, Calendar as CalendarIcon, Clock, MapPin, Users } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
@@ -25,7 +25,6 @@ interface Event {
   time_end: string | null;
   location: string | null;
   category: string;
-  featured: boolean;
   max_attendees: number | null;
   image_url: string | null;
   detailed_content: string | null;
@@ -40,7 +39,6 @@ interface EventFormData {
   time_end: string;
   location: string;
   category: string;
-  featured: boolean;
   max_attendees: string;
   image_url?: string;
   detailed_content?: string;
@@ -65,7 +63,6 @@ const EventManagement = ({ isReadOnly = false }: EventManagementProps) => {
     time_end: '',
     location: '',
     category: 'Social',
-    featured: false,
     max_attendees: '',
     image_url: '',
     detailed_content: ''
@@ -105,7 +102,6 @@ const EventManagement = ({ isReadOnly = false }: EventManagementProps) => {
       time_end: '',
       location: '',
       category: 'Social',
-      featured: false,
       max_attendees: '',
       image_url: '',
       detailed_content: ''
@@ -200,7 +196,6 @@ const EventManagement = ({ isReadOnly = false }: EventManagementProps) => {
       time_end: event.time_end || '',
       location: event.location || '',
       category: event.category,
-      featured: event.featured,
       max_attendees: event.max_attendees?.toString() || '',
       image_url: event.image_url || '',
       detailed_content: event.detailed_content || ''
@@ -235,7 +230,6 @@ const EventManagement = ({ isReadOnly = false }: EventManagementProps) => {
         time_end: formData.time_end || null,
         location: formData.location || null,
         category: formData.category,
-        featured: formData.featured,
         max_attendees: formData.max_attendees ? parseInt(formData.max_attendees) : null,
         image_url: formData.image_url || null,
         detailed_content: formData.detailed_content || null
@@ -468,49 +462,21 @@ const EventManagement = ({ isReadOnly = false }: EventManagementProps) => {
                   />
                 </div>
 
-                <div className="md:col-span-2 flex items-center space-x-2">
-                  <Switch
-                    id="featured"
-                    checked={formData.featured}
-                    onCheckedChange={(checked) => setFormData({ ...formData, featured: checked })}
+                <div className="md:col-span-2">
+                  <Label htmlFor="image_upload">Event Image (JPG, PNG, PDF)</Label>
+                  <Input
+                    id="image_upload"
+                    type="file"
+                    accept=".jpg,.jpeg,.png,.pdf"
+                    onChange={handleFileUpload}
+                    className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/80"
                   />
-                  <Label htmlFor="featured">Featured Event</Label>
+                  {formData.image_url && (
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Current file: <a href={formData.image_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">View file</a>
+                    </p>
+                  )}
                 </div>
-
-                {formData.featured && (
-                  <>
-                     <div className="md:col-span-2">
-                       <Label htmlFor="detailed_content">Detailed Event Write-up</Label>
-                       <p className="text-xs text-muted-foreground mb-2">
-                         💡 Tip: You can paste images directly (Ctrl+V) into this text area!
-                       </p>
-                       <Textarea
-                         id="detailed_content"
-                         value={formData.detailed_content || ''}
-                         onChange={(e) => setFormData({ ...formData, detailed_content: e.target.value })}
-                         onPaste={handleImagePaste}
-                         rows={6}
-                         placeholder="Add detailed information about this featured event... You can also paste images directly here!"
-                       />
-                     </div>
-
-                    <div className="md:col-span-2">
-                      <Label htmlFor="image_upload">Event Image (JPG, PNG, PDF)</Label>
-                      <Input
-                        id="image_upload"
-                        type="file"
-                        accept=".jpg,.jpeg,.png,.pdf"
-                        onChange={handleFileUpload}
-                        className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/80"
-                      />
-                      {formData.image_url && (
-                        <p className="text-sm text-muted-foreground mt-1">
-                          Current file: <a href={formData.image_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">View file</a>
-                        </p>
-                      )}
-                    </div>
-                  </>
-                )}
               </div>
 
               <div className="flex justify-end space-x-2">
@@ -535,8 +501,7 @@ const EventManagement = ({ isReadOnly = false }: EventManagementProps) => {
                 <span className={`px-3 py-1 rounded-full text-sm font-medium ${getCategoryColor(event.category)}`}>
                   {event.category}
                 </span>
-                  <div className="flex items-center space-x-2">
-                   {event.featured && <Star className="w-4 h-4 text-secondary" />}
+                   <div className="flex items-center space-x-2">
                    {!isReadOnly && (
                      <>
                        <Button
