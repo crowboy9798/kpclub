@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Calendar, Clock, MapPin, Users, Star, ArrowRight } from 'lucide-react';
+import { Calendar, Clock, MapPin, Users, ArrowRight, CalendarPlus } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { Link } from 'react-router-dom';
@@ -60,6 +60,43 @@ const Events = () => {
     }
   };
 
+  const generateGoogleCalendarUrl = (event: Event) => {
+    const startDate = new Date(event.date_start);
+    const endDate = event.date_end ? new Date(event.date_end) : startDate;
+    
+    // If time is provided, combine date and time
+    if (event.time_start) {
+      const [hours, minutes] = event.time_start.split(':');
+      startDate.setHours(parseInt(hours), parseInt(minutes));
+    }
+    
+    if (event.time_end && event.date_end) {
+      const [hours, minutes] = event.time_end.split(':');
+      endDate.setHours(parseInt(hours), parseInt(minutes));
+    } else if (event.time_end) {
+      const [hours, minutes] = event.time_end.split(':');
+      endDate.setHours(parseInt(hours), parseInt(minutes));
+    } else {
+      // Default to 1 hour duration if no end time
+      endDate.setTime(startDate.getTime() + 60 * 60 * 1000);
+    }
+
+    // Format dates for Google Calendar (YYYYMMDDTHHMMSSZ)
+    const formatDate = (date: Date) => {
+      return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+    };
+
+    const params = new URLSearchParams({
+      action: 'TEMPLATE',
+      text: event.title,
+      dates: `${formatDate(startDate)}/${formatDate(endDate)}`,
+      details: event.description || '',
+      location: event.location || '',
+    });
+
+    return `https://calendar.google.com/calendar/render?${params.toString()}`;
+  };
+
   return (
     <div className="min-h-screen py-8 px-4">
       <div className="max-w-7xl mx-auto">
@@ -109,6 +146,16 @@ const Events = () => {
                         </div>
                       )}
                     </div>
+                    
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="w-full mt-4"
+                      onClick={() => window.open(generateGoogleCalendarUrl(event), '_blank')}
+                    >
+                      <CalendarPlus className="w-4 h-4 mr-2" />
+                      Add to Calendar
+                    </Button>
                     
                   </CardContent>
                 </Card>
