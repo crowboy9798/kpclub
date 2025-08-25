@@ -73,7 +73,7 @@ const InvitationManagement = ({ user, isAdmin }: InvitationManagementProps) => {
         .from('invitations')
         .select('id, used, expires_at')
         .eq('email', newInvitation.email.trim())
-        .single();
+        .maybeSingle();
 
       if (existingInvitation && !existingInvitation.used && new Date(existingInvitation.expires_at) > new Date()) {
         toast({
