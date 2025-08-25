@@ -68,39 +68,6 @@ const InvitationManagement = ({ user, isAdmin }: InvitationManagementProps) => {
 
     setIsLoading(true);
     try {
-      // First check if the email belongs to a member with "Committee" in their groups
-      const { data: member, error: memberError } = await supabase
-        .from('KPC2')
-        .select('Email, "Member_groups:"')
-        .ilike('Email', newInvitation.email.trim())
-        .single();
-
-      if (memberError || !member) {
-        toast({
-          title: "Member Not Found",
-          description: "This email address is not found in the member database.",
-          variant: "destructive"
-        });
-        setIsLoading(false);
-        return;
-      }
-
-      // Check if member has "Committee" in their groups
-      const memberGroups = member["Member_groups:"] || [];
-      const hasCommitteeGroup = memberGroups.some((group: string) => 
-        group && group.toLowerCase().includes('committee')
-      );
-
-      if (!hasCommitteeGroup) {
-        toast({
-          title: "Not Eligible",
-          description: "This member does not have 'Committee' in their member groups. Only committee members can receive invitations.",
-          variant: "destructive"
-        });
-        setIsLoading(false);
-        return;
-      }
-
       // Check if invitation already exists for this email
       const { data: existingInvitation } = await supabase
         .from('invitations')
@@ -213,7 +180,7 @@ const InvitationManagement = ({ user, isAdmin }: InvitationManagementProps) => {
             Send Committee Invitation
           </CardTitle>
           <p className="text-sm text-muted-foreground mt-2">
-            Only members with "Committee" in their member groups can receive invitations.
+            Send invitations to committee members to give them admin access.
           </p>
         </CardHeader>
         <CardContent>
