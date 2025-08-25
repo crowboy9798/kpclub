@@ -75,26 +75,42 @@ const InvitationManagement = ({ user, isAdmin }: InvitationManagementProps) => {
         .eq('email', newInvitation.email.trim())
         .maybeSingle();
 
-      if (existingInvitation && !existingInvitation.used && new Date(existingInvitation.expires_at) > new Date()) {
-        toast({
-          title: "Invitation Already Exists",
-          description: "An active invitation already exists for this email address.",
-          variant: "destructive"
-        });
-        setIsLoading(false);
-        return;
+      if (existingInvitation) {
+        if (!existingInvitation.used && new Date(existingInvitation.expires_at) > new Date()) {
+          toast({
+            title: "Invitation Already Exists",
+            description: "An active invitation already exists for this email address.",
+            variant: "destructive"
+          });
+          setIsLoading(false);
+          return;
+        }
+        
+        // Update existing invitation (expired or used) with new details
+        const { error } = await supabase
+          .from('invitations')
+          .update({
+            role: newInvitation.role,
+            invited_by: user.id,
+            used: false,
+            expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days from now
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', existingInvitation.id);
+
+        if (error) throw error;
+      } else {
+        // Create new invitation record
+        const { error } = await supabase
+          .from('invitations')
+          .insert([{
+            email: newInvitation.email.trim(),
+            role: newInvitation.role,
+            invited_by: user.id
+          }]);
+
+        if (error) throw error;
       }
-
-      // Create invitation record
-      const { error } = await supabase
-        .from('invitations')
-        .insert([{
-          email: newInvitation.email.trim(),
-          role: newInvitation.role,
-          invited_by: user.id
-        }]);
-
-      if (error) throw error;
 
       toast({
         title: "Invitation Created",
