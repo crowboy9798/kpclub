@@ -76,9 +76,11 @@ const InvitationManagement = ({ user, isAdmin }: InvitationManagementProps) => {
           role: newInvitation.role,
           invited_by: user.id,
           used: false,
-          expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+          expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+          updated_at: new Date().toISOString()
         }, {
-          onConflict: 'email'
+          onConflict: 'email',
+          ignoreDuplicates: false
         });
 
       if (error) throw error;
