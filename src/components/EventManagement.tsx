@@ -298,12 +298,10 @@ const EventManagement = ({ isReadOnly = false }: EventManagementProps) => {
     switch (category) {
       case 'Social':
         return 'bg-secondary/20 text-secondary-foreground';
-      case 'Educational':
-        return 'bg-primary/20 text-primary';
       case 'Special Event':
         return 'bg-red-100 text-red-800';
-      case 'Community Service':
-        return 'bg-green-100 text-green-800';
+      case 'Committee':
+        return 'bg-blue-100 text-blue-800';
       default:
         return 'bg-muted text-muted-foreground';
     }
@@ -445,9 +443,8 @@ const EventManagement = ({ isReadOnly = false }: EventManagementProps) => {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="Social">Social</SelectItem>
-                      <SelectItem value="Educational">Educational</SelectItem>
                       <SelectItem value="Special Event">Special Event</SelectItem>
-                      <SelectItem value="Community Service">Community Service</SelectItem>
+                      <SelectItem value="Committee">Committee</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
