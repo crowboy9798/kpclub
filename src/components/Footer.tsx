@@ -57,6 +57,11 @@ const Footer = () => {
                   Get in Touch
                 </a>
               </li>
+              <li>
+                <a href="/admin" className="text-primary-foreground/80 hover:text-secondary transition-smooth">
+                  Admin
+                </a>
+              </li>
             </ul>
           </div>
         </div>
