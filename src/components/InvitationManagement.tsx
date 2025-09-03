@@ -85,6 +85,26 @@ const InvitationManagement = ({ user, isAdmin }: InvitationManagementProps) => {
 
       if (error) throw error;
 
+      // Send invitation email
+      try {
+        const { error: emailError } = await supabase.functions.invoke('send-invitation-email', {
+          body: {
+            email: newInvitation.email.trim(),
+            role: newInvitation.role,
+            invitedBy: user.email || user.id,
+            expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+          }
+        });
+
+        if (emailError) {
+          console.error('Email sending failed:', emailError);
+          // Don't throw - invitation was created successfully even if email failed
+        }
+      } catch (emailError) {
+        console.error('Email sending error:', emailError);
+        // Don't throw - invitation was created successfully even if email failed
+      }
+
       toast({
         title: "Invitation Created",
         description: `Invitation sent to ${newInvitation.email}`,
