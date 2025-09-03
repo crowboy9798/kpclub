@@ -24,11 +24,20 @@ const Admin = () => {
   });
   const [isSignUp, setIsSignUp] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'members' | 'events' | 'newsletters' | 'invitations'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'members' | 'events' | 'newsletters' | 'invitations' | 'settings'>('dashboard');
   const [isAddGroupDialogOpen, setIsAddGroupDialogOpen] = useState(false);
   const [newGroupName, setNewGroupName] = useState('');
   const [availableGroups, setAvailableGroups] = useState<string[]>(['2024', '2025', 'Committee', 'LTL']);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [changePasswordData, setChangePasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
 
   // Fetch user role
   const fetchUserRole = async (userId: string) => {
@@ -171,6 +180,98 @@ const Admin = () => {
       ...loginData,
       [e.target.name]: e.target.value
     });
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+        redirectTo: `${window.location.origin}/admin`
+      });
+
+      if (error) {
+        toast({
+          title: "Password Reset Failed",
+          description: error.message,
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Password Reset Email Sent",
+          description: "Check your email for password reset instructions.",
+        });
+        setShowForgotPassword(false);
+        setResetEmail('');
+      }
+    } catch (error) {
+      console.error('Password reset error:', error);
+      toast({
+        title: "Password Reset Error",
+        description: "An error occurred while sending the reset email.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (changePasswordData.newPassword !== changePasswordData.confirmPassword) {
+      toast({
+        title: "Password Mismatch",
+        description: "New password and confirm password do not match.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (changePasswordData.newPassword.length < 6) {
+      toast({
+        title: "Password Too Short",
+        description: "Password must be at least 6 characters long.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: changePasswordData.newPassword
+      });
+
+      if (error) {
+        toast({
+          title: "Password Change Failed",
+          description: error.message,
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Password Changed Successfully",
+          description: "Your password has been updated.",
+        });
+        setChangePasswordData({
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: ''
+        });
+      }
+    } catch (error) {
+      console.error('Password change error:', error);
+      toast({
+        title: "Password Change Error",
+        description: "An error occurred while changing your password.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Check if user is admin or committee
@@ -319,9 +420,60 @@ const Admin = () => {
                 >
                   {isSignUp ? 'Already have an account? Sign In' : 'Need to create an admin account? Sign Up'}
                 </Button>
+                
+                {!isSignUp && (
+                  <div className="mt-2">
+                    <Button 
+                      type="button"
+                      variant="link" 
+                      onClick={() => setShowForgotPassword(true)}
+                      className="text-sm text-muted-foreground"
+                    >
+                      Forgot your password?
+                    </Button>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
+
+          {/* Forgot Password Dialog */}
+          <Dialog open={showForgotPassword} onOpenChange={setShowForgotPassword}>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Reset Password</DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleForgotPassword} className="space-y-4">
+                <div>
+                  <Label htmlFor="resetEmail">Email Address</Label>
+                  <Input
+                    id="resetEmail"
+                    type="email"
+                    value={resetEmail}
+                    onChange={(e) => setResetEmail(e.target.value)}
+                    required
+                    className="mt-1"
+                    placeholder="Enter your email address"
+                  />
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setShowForgotPassword(false);
+                      setResetEmail('');
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={isLoading}>
+                    {isLoading ? 'Sending...' : 'Send Reset Email'}
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
     );
@@ -375,6 +527,13 @@ const Admin = () => {
                 Invitations
               </Button>
             )}
+            <Button 
+              variant={activeTab === 'settings' ? 'default' : 'outline'}
+              onClick={() => setActiveTab('settings')}
+            >
+              <Settings className="w-4 h-4 mr-2" />
+              Settings
+            </Button>
             <Button 
               variant="outline" 
               onClick={handleLogout}
@@ -456,6 +615,90 @@ const Admin = () => {
           <EventManagement isReadOnly={isCommittee} />
         ) : activeTab === 'invitations' ? (
           <InvitationManagement user={user} isAdmin={isAdmin} />
+        ) : activeTab === 'settings' ? (
+          <div className="max-w-2xl">
+            <Card className="card-elegant">
+              <CardHeader>
+                <CardTitle className="flex items-center text-primary">
+                  <Lock className="w-6 h-6 mr-3" />
+                  Change Password
+                </CardTitle>
+                <p className="text-muted-foreground">Update your account password</p>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleChangePassword} className="space-y-4">
+                  <div>
+                    <Label htmlFor="newPassword">New Password</Label>
+                    <div className="relative mt-1">
+                      <Input
+                        id="newPassword"
+                        type={showNewPassword ? "text" : "password"}
+                        value={changePasswordData.newPassword}
+                        onChange={(e) => setChangePasswordData({
+                          ...changePasswordData,
+                          newPassword: e.target.value
+                        })}
+                        required
+                        className="pr-10"
+                        placeholder="Enter new password"
+                        minLength={6}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                        onClick={() => setShowNewPassword(!showNewPassword)}
+                        aria-label={showNewPassword ? "Hide password" : "Show password"}
+                      >
+                        {showNewPassword ? (
+                          <EyeOff className="h-4 w-4 text-muted-foreground" />
+                        ) : (
+                          <Eye className="h-4 w-4 text-muted-foreground" />
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                    <Input
+                      id="confirmPassword"
+                      type="password"
+                      value={changePasswordData.confirmPassword}
+                      onChange={(e) => setChangePasswordData({
+                        ...changePasswordData,
+                        confirmPassword: e.target.value
+                      })}
+                      required
+                      className="mt-1"
+                      placeholder="Confirm new password"
+                      minLength={6}
+                    />
+                  </div>
+
+                  <div className="flex justify-end gap-2 pt-4">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        setChangePasswordData({
+                          currentPassword: '',
+                          newPassword: '',
+                          confirmPassword: ''
+                        });
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                    <Button type="submit" disabled={isLoading}>
+                      {isLoading ? 'Updating...' : 'Update Password'}
+                    </Button>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+          </div>
         ) : (
           <NewsletterManagement />
         )}
