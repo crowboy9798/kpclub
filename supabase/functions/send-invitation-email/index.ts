@@ -48,7 +48,7 @@ const handler = async (req: Request): Promise<Response> => {
           <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h3 style="color: #333; margin-top: 0;">How to get started:</h3>
             <ol style="color: #666; line-height: 1.8;">
-              <li>Visit our admin portal: <a href="https://kensingtonprobusclub.netlify.app/admin" style="color: #2563eb;">https://kensingtonprobusclub.netlify.app/admin</a></li>
+              <li>Visit our admin portal: <a href="https://kpclub.netlify.app/admin" style="color: #2563eb;">https://kpclub.netlify.app/admin</a></li>
               <li>Click "Sign Up" and use this exact email address: <strong>${email}</strong></li>
               <li>Create your password and complete the registration</li>
               <li>You'll automatically be granted ${role} access</li>

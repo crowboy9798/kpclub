@@ -97,15 +97,25 @@ const Admin = () => {
 
     try {
       if (isSignUp) {
-        // Only allow tejifry@gmail.com to sign up
+        // Check if email has a valid invitation or is the main admin
         if (loginData.email !== 'tejifry@gmail.com') {
-          toast({
-            title: "Access Denied",
-            description: "Only the administrator email is allowed to create an account.",
-            variant: "destructive"
-          });
-          setIsLoading(false);
-          return;
+          const { data: invitation, error } = await supabase
+            .from('invitations')
+            .select('*')
+            .eq('email', loginData.email)
+            .eq('used', false)
+            .gt('expires_at', new Date().toISOString())
+            .single();
+
+          if (error || !invitation) {
+            toast({
+              title: "Access Denied",
+              description: "You need a valid invitation to create an account. Please contact an administrator.",
+              variant: "destructive"
+            });
+            setIsLoading(false);
+            return;
+          }
         }
 
         const { error } = await supabase.auth.signUp({
