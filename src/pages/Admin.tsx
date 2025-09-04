@@ -97,31 +97,29 @@ const Admin = () => {
 
     try {
       if (isSignUp) {
-        // Check if email has a valid invitation or is the main admin
-        if (loginData.email !== 'tejifry@gmail.com') {
-          console.log('Checking invitation for email:', loginData.email);
-          const { data: invitation, error } = await supabase
-            .from('invitations')
-            .select('*')
-            .eq('email', loginData.email)
-            .eq('used', false)
-            .gt('expires_at', new Date().toISOString())
-            .single();
+        // Check if email has a valid invitation
+        console.log('Checking invitation for email:', loginData.email);
+        const { data: invitation, error: inviteError } = await supabase
+          .from('invitations')
+          .select('*')
+          .eq('email', loginData.email)
+          .eq('used', false)
+          .gt('expires_at', new Date().toISOString())
+          .single();
 
-          console.log('Invitation query result:', { invitation, error });
+        console.log('Invitation query result:', { invitation, error: inviteError });
 
-          if (error || !invitation) {
-            toast({
-              title: "Access Denied",
-              description: `You need a valid invitation to create an account. Please ensure you're using the exact email address: ${loginData.email}`,
-              variant: "destructive"
-            });
-            setIsLoading(false);
-            return;
-          }
+        if (inviteError || !invitation) {
+          toast({
+            title: "Access Denied",
+            description: "You need a valid invitation to create an account. Contact administrator.",
+            variant: "destructive"
+          });
+          setIsLoading(false);
+          return;
         }
 
-        const { error } = await supabase.auth.signUp({
+        const { error: signUpError } = await supabase.auth.signUp({
           email: loginData.email,
           password: loginData.password,
           options: {
@@ -129,10 +127,10 @@ const Admin = () => {
           }
         });
 
-        if (error) {
+        if (signUpError) {
           toast({
             title: "Sign Up Failed",
-            description: error.message,
+            description: signUpError.message,
             variant: "destructive"
           });
         } else {
