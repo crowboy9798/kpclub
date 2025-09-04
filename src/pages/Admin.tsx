@@ -99,6 +99,7 @@ const Admin = () => {
       if (isSignUp) {
         // Check if email has a valid invitation or is the main admin
         if (loginData.email !== 'tejifry@gmail.com') {
+          console.log('Checking invitation for email:', loginData.email);
           const { data: invitation, error } = await supabase
             .from('invitations')
             .select('*')
@@ -107,10 +108,12 @@ const Admin = () => {
             .gt('expires_at', new Date().toISOString())
             .single();
 
+          console.log('Invitation query result:', { invitation, error });
+
           if (error || !invitation) {
             toast({
               title: "Access Denied",
-              description: "You need a valid invitation to create an account. Please contact an administrator.",
+              description: `You need a valid invitation to create an account. Please ensure you're using the exact email address: ${loginData.email}`,
               variant: "destructive"
             });
             setIsLoading(false);
