@@ -96,6 +96,7 @@ const Admin = () => {
     setIsLoading(true);
 
     try {
+      console.log('Auth form submitted. IsSignUp:', isSignUp, 'Email:', loginData.email);
       if (isSignUp) {
         // Check if email has a valid invitation
         console.log('Checking invitation for email:', loginData.email);
