@@ -366,7 +366,7 @@ const Admin = () => {
                 {isSignUp ? 'Create Admin Account' : 'Administrator Login'}
               </CardTitle>
               <p className="text-muted-foreground">
-                {isSignUp ? 'Set up your administrator account' : 'Access the club administration dashboard'}
+                {isSignUp ? 'Create your account using your invitation' : 'Access the club administration dashboard'}
               </p>
             </CardHeader>
             <CardContent>
