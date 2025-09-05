@@ -96,10 +96,15 @@ const Admin = () => {
     setIsLoading(true);
 
     try {
+      // Add alert for debugging - this will definitely show up
+      alert(`Form submitted! IsSignUp: ${isSignUp}, Email: ${loginData.email}`);
       console.log('Auth form submitted. IsSignUp:', isSignUp, 'Email:', loginData.email);
+      
       if (isSignUp) {
         // Check if email has a valid invitation
         console.log('Checking invitation for email:', loginData.email);
+        alert('About to check invitation...');
+        
         const { data: invitation, error: inviteError } = await supabase
           .from('invitations')
           .select('*')
@@ -109,8 +114,10 @@ const Admin = () => {
           .single();
 
         console.log('Invitation query result:', { invitation, error: inviteError });
+        alert(`Invitation check result: ${invitation ? 'Found' : 'Not found'}, Error: ${inviteError?.message || 'None'}`);
 
         if (inviteError || !invitation) {
+          alert('Invitation validation failed - showing access denied');
           toast({
             title: "Access Denied",
             description: "You need a valid invitation to create an account. Contact administrator.",
@@ -119,6 +126,8 @@ const Admin = () => {
           setIsLoading(false);
           return;
         }
+        
+        alert('Invitation found! Proceeding with signup...');
 
         const { error: signUpError } = await supabase.auth.signUp({
           email: loginData.email,
