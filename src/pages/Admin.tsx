@@ -108,7 +108,7 @@ const Admin = () => {
           .eq('email', loginData.email)
           .eq('used', false)
           .gt('expires_at', new Date().toISOString())
-          .single();
+          .maybeSingle();
 
         console.log('Invitation query result:', { invitation, error: inviteError });
 
