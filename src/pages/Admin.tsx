@@ -98,9 +98,14 @@ const Admin = () => {
     try {
       console.log('Auth form submitted. IsSignUp:', isSignUp, 'Email:', loginData.email);
       
+      console.log('=== SIGNUP PROCESS STARTED ===');
+      console.log('isSignUp:', isSignUp);
+      console.log('loginData:', loginData);
+      
       if (isSignUp) {
         // Check if email has a valid invitation
         console.log('Checking invitation for email:', loginData.email);
+        console.log('Current time:', new Date().toISOString());
         
         const { data: invitation, error: inviteError } = await supabase
           .from('invitations')
@@ -111,6 +116,8 @@ const Admin = () => {
           .maybeSingle();
 
         console.log('Invitation query result:', { invitation, error: inviteError });
+        console.log('Invitation found:', !!invitation);
+        console.log('Invitation details:', invitation);
 
         if (inviteError || !invitation) {
           toast({
