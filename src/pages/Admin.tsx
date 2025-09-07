@@ -103,31 +103,7 @@ const Admin = () => {
       console.log('loginData:', loginData);
       
       if (isSignUp) {
-        // Check if email has a valid invitation
-        console.log('Checking invitation for email:', loginData.email);
-        console.log('Current time:', new Date().toISOString());
-        
-        const { data: invitation, error: inviteError } = await supabase
-          .from('invitations')
-          .select('*')
-          .eq('email', loginData.email)
-          .eq('used', false)
-          .gt('expires_at', new Date().toISOString())
-          .maybeSingle();
-
-        console.log('Invitation query result:', { invitation, error: inviteError });
-        console.log('Invitation found:', !!invitation);
-        console.log('Invitation details:', invitation);
-
-        if (inviteError || !invitation) {
-          toast({
-            title: "Access Denied",
-            description: "You need a valid invitation to create an account. Contact administrator.",
-            variant: "destructive"
-          });
-          setIsLoading(false);
-          return;
-        }
+        // Invitation validation is now handled by database trigger
 
         const { error: signUpError } = await supabase.auth.signUp({
           email: loginData.email,
