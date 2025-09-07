@@ -29,8 +29,6 @@ const Admin = () => {
   const [newGroupName, setNewGroupName] = useState('');
   const [availableGroups, setAvailableGroups] = useState<string[]>(['2024', '2025', 'Committee', 'LTL']);
   const [userRole, setUserRole] = useState<string | null>(null);
-  const [showForgotPassword, setShowForgotPassword] = useState(false);
-  const [resetEmail, setResetEmail] = useState('');
   const [changePasswordData, setChangePasswordData] = useState({
     currentPassword: '',
     newPassword: '',
@@ -179,40 +177,6 @@ const Admin = () => {
     });
   };
 
-  const handleForgotPassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
-        redirectTo: `${window.location.origin}/admin`
-      });
-
-      if (error) {
-        toast({
-          title: "Password Reset Failed",
-          description: error.message,
-          variant: "destructive"
-        });
-      } else {
-        toast({
-          title: "Password Reset Email Sent",
-          description: "Check your email for password reset instructions.",
-        });
-        setShowForgotPassword(false);
-        setResetEmail('');
-      }
-    } catch (error) {
-      console.error('Password reset error:', error);
-      toast({
-        title: "Password Reset Error",
-        description: "An error occurred while sending the reset email.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -417,60 +381,10 @@ const Admin = () => {
                 >
                   {isSignUp ? 'Already have an account? Sign In' : 'Need to create an admin account? Sign Up'}
                 </Button>
-                
-                {!isSignUp && (
-                  <div className="mt-2">
-                    <Button 
-                      type="button"
-                      variant="link" 
-                      onClick={() => setShowForgotPassword(true)}
-                      className="text-sm text-muted-foreground"
-                    >
-                      Forgot your password?
-                    </Button>
-                  </div>
-                )}
               </div>
             </CardContent>
           </Card>
 
-          {/* Forgot Password Dialog */}
-          <Dialog open={showForgotPassword} onOpenChange={setShowForgotPassword}>
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle>Reset Password</DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleForgotPassword} className="space-y-4">
-                <div>
-                  <Label htmlFor="resetEmail">Email Address</Label>
-                  <Input
-                    id="resetEmail"
-                    type="email"
-                    value={resetEmail}
-                    onChange={(e) => setResetEmail(e.target.value)}
-                    required
-                    className="mt-1"
-                    placeholder="Enter your email address"
-                  />
-                </div>
-                <div className="flex justify-end gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => {
-                      setShowForgotPassword(false);
-                      setResetEmail('');
-                    }}
-                  >
-                    Cancel
-                  </Button>
-                  <Button type="submit" disabled={isLoading}>
-                    {isLoading ? 'Sending...' : 'Send Reset Email'}
-                  </Button>
-                </div>
-              </form>
-            </DialogContent>
-          </Dialog>
         </div>
       </div>
     );
