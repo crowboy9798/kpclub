@@ -938,16 +938,17 @@ const MemberManagement = ({ isReadOnly = false }: MemberManagementProps) => {
             </div>
             
             {/* Selection Actions - Always Visible */}
-            <div className="flex items-center gap-3 px-4 py-2 bg-muted/20 rounded-md border min-w-fit">
-              <span className="text-sm text-muted-foreground whitespace-nowrap">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 bg-muted/20 rounded-md border">
+              <span className="text-sm text-muted-foreground flex-shrink-0">
                 {selectedMembers.size || 0} member{selectedMembers.size !== 1 ? 's' : ''} selected
               </span>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2 w-full sm:w-auto">
                 <Button 
                   variant="outline" 
                   size="sm" 
                   onClick={clearSelection}
                   disabled={selectedMembers.size === 0}
+                  className="flex-1 sm:flex-none"
                 >
                   Clear Selection
                 </Button>
@@ -956,6 +957,7 @@ const MemberManagement = ({ isReadOnly = false }: MemberManagementProps) => {
                     <Button 
                       size="sm"
                       disabled={selectedMembers.size === 0}
+                      className="flex-1 sm:flex-none"
                     >
                       <Mail className="w-4 h-4 mr-2" />
                       Send Email
