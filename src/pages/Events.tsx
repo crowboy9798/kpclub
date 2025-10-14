@@ -124,7 +124,7 @@ const Events = () => {
                     </div>
                     
                     <h3 className="text-lg font-semibold text-primary mb-2">{event.title}</h3>
-                    <p className="text-muted-foreground text-sm mb-4 line-clamp-3">{event.description}</p>
+                    <p className="text-muted-foreground text-sm mb-4 line-clamp-6">{event.description}</p>
                     
                     <div className="space-y-1 mb-4">
                       <div className="flex items-center text-xs text-muted-foreground">
