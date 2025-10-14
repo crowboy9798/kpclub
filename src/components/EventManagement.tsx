@@ -347,7 +347,7 @@ const EventManagement = ({ isReadOnly = false }: EventManagementProps) => {
                     id="description"
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    rows={3}
+                    className="min-h-[100px] max-h-[300px]"
                     placeholder="Optional - Add event description"
                   />
                 </div>
@@ -522,9 +522,11 @@ const EventManagement = ({ isReadOnly = false }: EventManagementProps) => {
               </div>
 
               <h3 className="text-lg font-semibold text-primary mb-2">{event.title}</h3>
-              <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
-                {event.description}
-              </p>
+              {event.description && (
+                <p className="text-muted-foreground text-sm mb-4 line-clamp-4">
+                  {event.description}
+                </p>
+              )}
 
               <div className="space-y-1">
                 <div className="flex items-center text-xs text-muted-foreground">
