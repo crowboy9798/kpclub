@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -523,9 +523,11 @@ const EventManagement = ({ isReadOnly = false }: EventManagementProps) => {
 
               <h3 className="text-lg font-semibold text-primary mb-2">{event.title}</h3>
               {event.description && (
-                <p className="text-muted-foreground text-sm mb-4 line-clamp-4">
-                  {event.description}
-                </p>
+                <ScrollArea className="h-[80px] mb-4">
+                  <p className="text-muted-foreground text-sm pr-4">
+                    {event.description}
+                  </p>
+                </ScrollArea>
               )}
 
               <div className="space-y-1">
