@@ -1152,8 +1152,7 @@ const MemberManagement = ({ isReadOnly = false }: MemberManagementProps) => {
       </Card>
 
       {/* Add/Edit Member Dialog */}
-      {!isReadOnly && (
-        <Dialog open={isAddDialogOpen || editingMember !== null} onOpenChange={(open) => {
+      <Dialog open={isAddDialogOpen || editingMember !== null} onOpenChange={(open) => {
         if (!open) {
           setIsAddDialogOpen(false);
           setEditingMember(null);
@@ -1163,7 +1162,7 @@ const MemberManagement = ({ isReadOnly = false }: MemberManagementProps) => {
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {editingMember ? 'Edit Member' : 'Add New Member'}
+              {isReadOnly ? 'View Member Details' : (editingMember ? 'Edit Member' : 'Add New Member')}
             </DialogTitle>
           </DialogHeader>
           
@@ -1176,6 +1175,7 @@ const MemberManagement = ({ isReadOnly = false }: MemberManagementProps) => {
                   value={formData.first_name}
                   onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
                   required
+                  disabled={isReadOnly}
                 />
               </div>
               <div>
@@ -1185,6 +1185,7 @@ const MemberManagement = ({ isReadOnly = false }: MemberManagementProps) => {
                   value={formData.last_name}
                   onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
                   required
+                  disabled={isReadOnly}
                 />
               </div>
             </div>
@@ -1197,6 +1198,7 @@ const MemberManagement = ({ isReadOnly = false }: MemberManagementProps) => {
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  disabled={isReadOnly}
                 />
               </div>
               <div>
@@ -1205,6 +1207,7 @@ const MemberManagement = ({ isReadOnly = false }: MemberManagementProps) => {
                   id="mobile"
                   value={formData.mobile}
                   onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
+                  disabled={isReadOnly}
                 />
               </div>
             </div>
@@ -1215,6 +1218,7 @@ const MemberManagement = ({ isReadOnly = false }: MemberManagementProps) => {
                 id="address"
                 value={formData.address}
                 onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                disabled={isReadOnly}
               />
             </div>
 
@@ -1225,6 +1229,7 @@ const MemberManagement = ({ isReadOnly = false }: MemberManagementProps) => {
                   id="suburb"
                   value={formData.suburb}
                   onChange={(e) => setFormData({ ...formData, suburb: e.target.value })}
+                  disabled={isReadOnly}
                 />
               </div>
               <div>
@@ -1233,6 +1238,7 @@ const MemberManagement = ({ isReadOnly = false }: MemberManagementProps) => {
                   id="pcode"
                   value={formData.pcode}
                   onChange={(e) => setFormData({ ...formData, pcode: e.target.value })}
+                  disabled={isReadOnly}
                 />
               </div>
             </div>
@@ -1244,6 +1250,7 @@ const MemberManagement = ({ isReadOnly = false }: MemberManagementProps) => {
                 type="date"
                 value={formData.dob}
                 onChange={(e) => setFormData({ ...formData, dob: e.target.value })}
+                disabled={isReadOnly}
               />
             </div>
 
@@ -1255,6 +1262,7 @@ const MemberManagement = ({ isReadOnly = false }: MemberManagementProps) => {
                   value={formData.nok}
                   onChange={(e) => setFormData({ ...formData, nok: e.target.value })}
                   placeholder="e.g., Spouse"
+                  disabled={isReadOnly}
                 />
               </div>
               <div>
@@ -1263,6 +1271,7 @@ const MemberManagement = ({ isReadOnly = false }: MemberManagementProps) => {
                   id="nok_name"
                   value={formData.nok_name}
                   onChange={(e) => setFormData({ ...formData, nok_name: e.target.value })}
+                  disabled={isReadOnly}
                 />
               </div>
               <div>
@@ -1272,6 +1281,7 @@ const MemberManagement = ({ isReadOnly = false }: MemberManagementProps) => {
                   value={formData.nok_contact}
                   onChange={(e) => setFormData({ ...formData, nok_contact: e.target.value })}
                   placeholder="Phone"
+                  disabled={isReadOnly}
                 />
               </div>
             </div>
@@ -1283,6 +1293,7 @@ const MemberManagement = ({ isReadOnly = false }: MemberManagementProps) => {
                 value={formData.member_no}
                 onChange={(e) => setFormData({ ...formData, member_no: e.target.value })}
                 placeholder="Member number"
+                disabled={isReadOnly}
               />
             </div>
 
@@ -1296,16 +1307,17 @@ const MemberManagement = ({ isReadOnly = false }: MemberManagementProps) => {
                   resetForm();
                 }}
               >
-                Cancel
+                {isReadOnly ? 'Close' : 'Cancel'}
               </Button>
-              <Button type="submit">
-                {editingMember ? 'Update Member' : 'Add Member'}
-              </Button>
+              {!isReadOnly && (
+                <Button type="submit">
+                  {editingMember ? 'Update Member' : 'Add Member'}
+                </Button>
+              )}
             </div>
           </form>
         </DialogContent>
       </Dialog>
-      )}
 
       {/* Email Dialog */}
       <Dialog open={isEmailDialogOpen} onOpenChange={setIsEmailDialogOpen}>
