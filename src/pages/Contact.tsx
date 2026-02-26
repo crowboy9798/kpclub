@@ -94,7 +94,7 @@ const Contact = () => {
       icon: Mail,
       title: "Email Address",
       primary: "kensingtonprobusclub@gmail.com",
-      secondary: "membership@kensingtonprobus.com",
+      secondary: "",
       description: "Send us an email anytime"
     },
     {
