@@ -75,6 +75,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     const { data, error } = await resend.emails.send({
       from: "Kensington Probus Club <admin@kensingtonprobusclub.com.au>",
+      reply_to: "kensingtonprobusclub@gmail.com",
       to: [email],
       subject: `Invitation to Join Kensington Probus Club - ${role} Access`,
       html: emailHtml,
