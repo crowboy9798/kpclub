@@ -56,6 +56,7 @@ const handler = async (req: Request): Promise<Response> => {
 
         const emailPayload: any = {
           from: `${fromName} <admin@kensingtonprobusclub.com.au>`,
+          reply_to: "kensingtonprobusclub@gmail.com",
           to: [recipient.email],
           subject: subject,
           html: `

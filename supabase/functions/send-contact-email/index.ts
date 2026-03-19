@@ -58,6 +58,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Send confirmation email to the sender
     await resend.emails.send({
       from: "Kensington Probus Club <admin@kensingtonprobusclub.com.au>",
+      reply_to: "kensingtonprobusclub@gmail.com",
       to: [email],
       subject: "Thank you for contacting us",
       html: `
