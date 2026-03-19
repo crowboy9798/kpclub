@@ -39,6 +39,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Send email to the club
     const result = await resend.emails.send({
       from: "Contact Form <admin@kensingtonprobusclub.com.au>",
+      reply_to: email,
       to: ["kensingtonprobusclub@gmail.com"],
       subject: `Contact Form: ${subject}`,
       html: `
